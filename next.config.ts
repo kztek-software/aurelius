@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Dockerfile copy .next/standalone — bắt buộc bật output standalone
+  output: "standalone",
+
   // Ẩn dev indicator badge (nút tròn N) để không che khuất bottom navigation trên mobile
   devIndicators: false,
 

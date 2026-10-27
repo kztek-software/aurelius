@@ -7,9 +7,16 @@ import type sql from "mssql";
 // trường PRISMA_SLOW_QUERY_MS khi cần soi kỹ hơn (mặc định 150ms).
 const SLOW_QUERY_MS = Number(process.env.PRISMA_SLOW_QUERY_MS) || 150;
 
+// Next.js tự nạp DATABASE_URL từ .env — KHÔNG ghi mật khẩu cứng ở đây.
+// Lúc `next build` (Docker) có thể chưa có biến này: dùng chuỗi giả không chứa
+// thông tin đăng nhập, vì client chỉ mở kết nối khi có query thật.
 const connectionString =
   process.env.DATABASE_URL ||
-  "sqlserver://14.160.26.45:9999;database=WorkingManager;user=vietanh;password=Kztek123456;encrypt=true;trustServerCertificate=true;";
+  (process.env.NEXT_PHASE === "phase-production-build" ? "sqlserver://localhost:1433" : "");
+
+if (!connectionString) {
+  throw new Error("Thiếu biến môi trường DATABASE_URL — đặt trong file .env");
+}
 
 // ---------------------------------------------------------------------------
 // Parse "sqlserver://host:port;key=value;..." thành sql.config object thay vì
