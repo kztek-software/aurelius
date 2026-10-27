@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # persisted system config (chứa SMTP password, không commit)
 /data/system-config.json
@@ -51,3 +52,9 @@ scripts/english-scan-results.json
 
 # runtime uploads (dữ liệu người dùng, không commit)
 /public/uploads/
+
+# .NET build output (mobile app)
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/

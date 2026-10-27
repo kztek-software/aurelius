@@ -3,16 +3,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # Tên Docker repository bắt buộc chữ thường — `kztek/OneMoreK` gây lỗi
-    # "invalid reference format: repository name must be lowercase".
-    image: ${APP_IMAGE:-kztek/kztek-workmanagement:latest}
+    image: kztek/onemorek:latest
     container_name: kztek-work-management
     restart: unless-stopped
     ports:
       - "3000:3000"
+    # Nạp toàn bộ biến trong .env (SMTP_*, ZALO_*, DISCORD_*, COOKIE_SECURE...) vào container
+    env_file: .env
     environment:
-      # Nối tới SQL Server ngoài (mặc định trỏ về server hiện có trong .env.example)
-      DATABASE_URL: ${DATABASE_URL:-sqlserver://14.160.26.45:9999;database=WorkingManager;user=vietanh;password=Kztek123456;encrypt=true;trustServerCertificate=true;}
+      # Nối tới SQL Server ngoài — KHÔNG ghi mật khẩu ở đây, đặt trong .env
+      DATABASE_URL: ${DATABASE_URL:?Cần đặt DATABASE_URL trong .env}
       AUTH_SECRET: ${AUTH_SECRET:?Cần đặt AUTH_SECRET trong .env}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     volumes:
