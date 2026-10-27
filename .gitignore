@@ -52,3 +52,9 @@ scripts/english-scan-results.json
 
 # runtime uploads (dữ liệu người dùng, không commit)
 /public/uploads/
+
+# .NET build output (mobile app)
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/
