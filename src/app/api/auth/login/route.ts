@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const input = email.toLowerCase().trim();
 
     // Hỗ trợ đăng nhập bằng username ("admin") hoặc email ("admin@kztek.net", v.v.)
-    let user = await prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         OR: [
           { email: input },
