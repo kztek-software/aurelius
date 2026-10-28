@@ -37,6 +37,7 @@ import {
   MessageCircle,
   Bell,
   Bot,
+  TrendingUp,
 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,12 @@ const PROJECT_GRADIENTS = [
   "from-[#F05922] to-[#251C53]",
   "from-cyan-500 to-blue-600",
 ];
+
+// Khóa lưu mục đã ghim. Trang "Thống Kê Công Việc" không phụ thuộc dự án nên dùng khóa cố định,
+// để mục ghim không biến mất khi chuyển sang dự án khác.
+function pinKeyOf(href: string) {
+  return href.endsWith("/my-stats") ? "workspace:my-stats" : href;
+}
 
 function getProjectGradient(key: string) {
   let hash = 0;
@@ -174,12 +181,13 @@ export function AppShell({
   // `pinnedOverride` giữ thay đổi của phiên hiện tại và được ưu tiên hơn
   // localStorage, nhờ đó ghim vẫn hoạt động khi localStorage bị chặn.
   const [pinnedOverride, setPinnedOverride] = useState<string[] | null>(null);
-  const pinnedHrefs = pinnedOverride ?? persistedPinned;
+  const pinnedHrefs = [...new Set((pinnedOverride ?? persistedPinned).map(pinKeyOf))];
 
   function togglePinnedNav(href: string) {
-    const next = pinnedHrefs.includes(href)
-      ? pinnedHrefs.filter((h) => h !== href)
-      : [...pinnedHrefs, href];
+    const key = pinKeyOf(href);
+    const next = pinnedHrefs.includes(key)
+      ? pinnedHrefs.filter((h) => h !== key)
+      : [...pinnedHrefs, key];
     setPinnedOverride(next);
     writeLocalStorage(pinnedStorageKey, JSON.stringify(next));
   }
@@ -289,6 +297,11 @@ export function AppShell({
     { href: `/projects/${project.id}/tickets`, label: "Hộp Thư Ticket KH", icon: LifeBuoy },
     { href: `/projects/${project.id}/sprints`, label: "Sprints & Kế Hoạch", icon: Rocket },
     { href: `/projects/${project.id}/reports`, label: "Báo Cáo & KPI", icon: BarChart3 },
+  ];
+
+  // Mục không gắn với dự án đang chọn: số liệu tổng hợp trên mọi dự án của bản thân / nhóm mình quản lý
+  const workspaceNav = [
+    { href: `/projects/${project.id}/my-stats`, label: "Thống Kê Công Việc", icon: TrendingUp },
   ];
 
   const systemNav = [
@@ -433,6 +446,7 @@ export function AppShell({
     pathname.endsWith("/board") ? "Board Công Việc" :
     pathname.endsWith("/sprints") ? "Sprints & Kế Hoạch" :
     pathname.endsWith("/reports") ? "Báo Cáo & KPI" :
+    pathname.endsWith("/my-stats") ? "Thống Kê Công Việc" :
     pathname.endsWith("/tickets") ? "Tickets Khách Hàng" :
     pathname.endsWith("/notion") ? "Tích Hợp Notion Hub" :
     pathname.endsWith("/users") ? "Người Dùng & Phân Quyền" :
@@ -442,9 +456,11 @@ export function AppShell({
     "";
 
   // Danh sách phẳng toàn bộ mục nav (đã lọc visible) — dùng để tra cứu icon/label cho mục đã ghim
-  const allVisibleNavItems = [...mainNav, ...systemNav.filter((item) => item.visible)];
+  const allVisibleNavItems = [...workspaceNav, ...mainNav, ...systemNav.filter((item) => item.visible)];
+  // Trang thuộc nhóm "Công việc" -> breadcrumb không hiển thị như trang con của dự án
+  const isWorkspacePage = workspaceNav.some((item) => pathname === item.href);
   const pinnedNavItems = pinnedHrefs
-    .map((href) => allVisibleNavItems.find((item) => item.href === href))
+    .map((href) => allVisibleNavItems.find((item) => pinKeyOf(item.href) === href))
     .filter((item): item is (typeof allVisibleNavItems)[number] => Boolean(item));
 
   // Helper: render 1 mục nav sidebar kèm nút ghim/bỏ ghim (dùng chung cho mainNav, systemNav và mục "Đã ghim")
@@ -455,7 +471,7 @@ export function AppShell({
   ) {
     const active =
       pathname === item.href || (item.href.endsWith("/dashboard") && pathname === `/projects/${project.id}`);
-    const pinned = pinnedHrefs.includes(item.href);
+    const pinned = pinnedHrefs.includes(pinKeyOf(item.href));
     const handlePrefetch = () => {
       if (item.href.endsWith("/dashboard")) {
         prefetchTab(`/api/projects/${project.id}/dashboard`);
@@ -775,6 +791,14 @@ export function AppShell({
           </div>
         )}
 
+        {/* Work Section — không phụ thuộc dự án đang chọn */}
+        <div className="space-y-1">
+          <div className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-muted">
+            Công việc
+          </div>
+          {workspaceNav.map((item) => renderNavItem(item, isMobile))}
+        </div>
+
         {/* Main Workspace Section */}
         <div className="space-y-1">
           <div className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-muted">
@@ -886,15 +910,22 @@ export function AppShell({
               <Menu className="h-4 w-4" />
             </button>
 
-            <Link
-              href={`/projects/${project.id}/dashboard`}
-              className="text-muted hover:text-foreground flex items-center gap-1.5 transition-colors shrink-0"
-              suppressHydrationWarning
-            >
-              <FolderKanban className="h-3.5 w-3.5 text-accent" />
-              <span className="hidden sm:inline font-bold" suppressHydrationWarning>{project.name}</span>
-              <span className="sm:hidden font-mono font-bold text-accent" suppressHydrationWarning>{project.key}</span>
-            </Link>
+            {isWorkspacePage ? (
+              <span className="text-muted flex items-center gap-1.5 shrink-0 font-bold" suppressHydrationWarning>
+                <TrendingUp className="h-3.5 w-3.5 text-accent" />
+                Công việc
+              </span>
+            ) : (
+              <Link
+                href={`/projects/${project.id}/dashboard`}
+                className="text-muted hover:text-foreground flex items-center gap-1.5 transition-colors shrink-0"
+                suppressHydrationWarning
+              >
+                <FolderKanban className="h-3.5 w-3.5 text-accent" />
+                <span className="hidden sm:inline font-bold" suppressHydrationWarning>{project.name}</span>
+                <span className="sm:hidden font-mono font-bold text-accent" suppressHydrationWarning>{project.key}</span>
+              </Link>
+            )}
             <span className="text-muted/40">/</span>
             <span
               className="text-foreground font-bold truncate"
