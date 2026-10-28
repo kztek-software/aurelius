@@ -1,27 +1,34 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Calculator,
-  X,
-  RotateCcw,
-  Sparkles,
-  TrendingUp,
-  Clock,
-  Users,
-  Target,
-  Percent,
-  CheckCircle2,
-  HelpCircle,
-  Layers,
-} from "lucide-react";
+import { Calculator, X, Layers, Delete } from "lucide-react";
+import { CalculatorUnitConverter } from "./calculator-unit-converter";
+import { CalculatorEncodingTools } from "./calculator-encoding-tools";
+import { CalculatorJsonFormatter } from "./calculator-json-formatter";
 
 interface SmartWorkCalculatorProps {
   onClose: () => void;
 }
 
+type CalculatorTab = "STANDARD" | "UNIT" | "ENCODE" | "JSON" | "SPRINT" | "KPI";
+
+const TABS: { key: CalculatorTab; label: string }[] = [
+  { key: "STANDARD", label: "Số Học" },
+  { key: "UNIT", label: "Đổi Đơn Vị" },
+  { key: "ENCODE", label: "Mã Hóa" },
+  { key: "JSON", label: "JSON" },
+  { key: "SPRINT", label: "Sprint & SP" },
+  { key: "KPI", label: "Tiến Độ & KPI" },
+];
+
+// Loại bỏ sai số dấu phẩy động (0.1 + 0.2 = 0.30000000000000004 -> 0.3)
+function formatNumber(n: number) {
+  if (!Number.isFinite(n)) return "0";
+  return parseFloat(n.toPrecision(15)).toString();
+}
+
 export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
-  const [activeTab, setActiveTab] = useState<"STANDARD" | "SPRINT" | "KPI">("STANDARD");
+  const [activeTab, setActiveTab] = useState<CalculatorTab>("STANDARD");
 
   // Standard Calculator State
   const [display, setDisplay] = useState("0");
@@ -69,30 +76,52 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
     setWaitingForNewOperand(false);
   };
 
+  // Xóa ký tự cuối cùng (nút ⌫ / phím Backspace)
+  const handleBackspace = () => {
+    // Đang hiển thị kết quả phép tính -> xóa kết quả về 0 (giữ phép toán đang chờ nếu có)
+    if (waitingForNewOperand) {
+      setDisplay("0");
+      setWaitingForNewOperand(false);
+      return;
+    }
+    // Số dạng mũ (1e+21) hoặc Infinity/NaN không xóa từng ký tự được -> về 0
+    if (/[^0-9.\-]/.test(display)) {
+      setDisplay("0");
+      return;
+    }
+    const next = display.slice(0, -1);
+    setDisplay(next === "" || next === "-" || next === "-0" ? "0" : next);
+  };
+
   const handleToggleSign = () => {
     const val = parseFloat(display);
-    setDisplay((val * -1).toString());
+    setDisplay(formatNumber(val * -1));
   };
 
   const handlePercentage = () => {
     const val = parseFloat(display);
-    setDisplay((val / 100).toString());
+    setDisplay(formatNumber(val / 100));
   };
 
   const handleSqrt = () => {
     const val = parseFloat(display);
     if (val >= 0) {
-      setDisplay(Math.sqrt(val).toString());
-      setHistory((prev) => [`√(${val}) = ${Math.sqrt(val)}`, ...prev.slice(0, 4)]);
+      const result = formatNumber(Math.sqrt(val));
+      setDisplay(result);
+      setHistory((prev) => [`√(${val}) = ${result}`, ...prev.slice(0, 4)]);
     }
   };
 
   const performOperation = (nextOp: string) => {
     const inputValue = parseFloat(display);
 
-    if (prevValue === null) {
-      setPrevValue(inputValue);
-    } else if (operation) {
+    // Bấm 2 toán tử liên tiếp (vd "2 + -"): chỉ thay toán tử, không tính với chính số đang hiển thị
+    if (waitingForNewOperand && operation && nextOp !== "=") {
+      setOperation(nextOp);
+      return;
+    }
+
+    if (prevValue !== null && operation) {
       const currentValue = prevValue;
       let result = 0;
 
@@ -115,12 +144,17 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
           result = inputValue;
       }
 
+      const formatted = formatNumber(result);
       setHistory((prev) => [
-        `${currentValue} ${operation} ${inputValue} = ${result}`,
+        `${currentValue} ${operation} ${inputValue} = ${formatted}`,
         ...prev.slice(0, 4),
       ]);
-      setPrevValue(result);
-      setDisplay(result.toString());
+      // Sau "=" kết thúc chuỗi phép tính: số nhập tiếp theo bắt đầu phép tính mới
+      setPrevValue(nextOp === "=" ? null : parseFloat(formatted));
+      setDisplay(formatted);
+    } else {
+      // Chưa có phép toán đang chờ: số hiện tại là toán hạng đầu; "=" thì không giữ lại giá trị nào
+      setPrevValue(nextOp === "=" ? null : inputValue);
     }
 
     setWaitingForNewOperand(true);
@@ -131,13 +165,26 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (activeTab !== "STANDARD") return;
+      // Bỏ qua tổ hợp phím (Ctrl +/- zoom, Alt+C...) và khi đang gõ trong ô nhập
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable)
+      ) {
+        return;
+      }
       if (e.key >= "0" && e.key <= "9") handleDigit(e.key);
+      else if (e.key === "Backspace") handleBackspace();
+      else if (e.key === "Delete" || e.key === "Escape") handleClear();
       else if (e.key === ".") handleDecimal();
       else if (e.key === "+" || e.key === "-") performOperation(e.key);
       else if (e.key === "*") performOperation("×");
       else if (e.key === "/") performOperation("÷");
       else if (e.key === "Enter" || e.key === "=") performOperation("=");
-      else if (e.key === "Escape") handleClear();
+      else return;
+      // Chặn hành vi mặc định: tránh Enter kích hoạt thêm nút đang được focus
+      e.preventDefault();
     };
 
     window.addEventListener("keydown", handleKey);
@@ -166,7 +213,7 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
   const estimatedCost = Math.round(teamMembers * sprintDays * manDayRate);
 
   return (
-    <div className="absolute right-6 top-16 z-40 w-96 bg-[#181236]/95 backdrop-blur-md border border-[#3E2D82] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-right-5 duration-150 text-white">
+    <div className="absolute right-6 top-16 z-40 w-[420px] max-w-[calc(100vw-3rem)] bg-[#181236]/95 backdrop-blur-md border border-[#3E2D82] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-right-5 duration-150 text-white">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#251C53] via-[#332570] to-[#251C53] px-4 py-3 border-b border-[#3E2D82] flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -187,47 +234,28 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
           type="button"
           onClick={onClose}
           className="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
-          title="Đóng (Esc)"
+          title="Đóng (Alt+C)"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex border-b border-[#312564] bg-[#120D2C] p-1 text-xs">
-        <button
-          type="button"
-          onClick={() => setActiveTab("STANDARD")}
-          className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
-            activeTab === "STANDARD"
-              ? "bg-[#251C53] text-white shadow-sm border border-[#44318E]"
-              : "text-zinc-400 hover:text-zinc-200"
-          }`}
-        >
-          Số Học
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("SPRINT")}
-          className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
-            activeTab === "SPRINT"
-              ? "bg-[#251C53] text-white shadow-sm border border-[#44318E]"
-              : "text-zinc-400 hover:text-zinc-200"
-          }`}
-        >
-          Sprint & Story Points
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("KPI")}
-          className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
-            activeTab === "KPI"
-              ? "bg-[#251C53] text-white shadow-sm border border-[#44318E]"
-              : "text-zinc-400 hover:text-zinc-200"
-          }`}
-        >
-          Tiến Độ & KPI
-        </button>
+      <div className="grid grid-cols-3 gap-0.5 border-b border-[#312564] bg-[#120D2C] p-1 text-xs">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveTab(tab.key)}
+            className={`py-1.5 rounded-lg font-medium transition-all ${
+              activeTab === tab.key
+                ? "bg-[#251C53] text-white shadow-sm border border-[#44318E]"
+                : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Body Content */}
@@ -250,9 +278,18 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
               <button
                 type="button"
                 onClick={handleClear}
-                className="py-2.5 rounded-xl bg-accent/20 hover:bg-accent/30 text-accent font-bold text-xs border border-accent/30 transition-all"
+                title="Xóa tất cả (Esc / Delete)"
+                className="col-span-2 py-2.5 rounded-xl bg-accent/20 hover:bg-accent/30 text-accent font-bold text-xs border border-accent/30 transition-all"
               >
                 C
+              </button>
+              <button
+                type="button"
+                onClick={handleBackspace}
+                title="Xóa ký tự cuối (Backspace)"
+                className="col-span-2 py-2.5 rounded-xl bg-accent/20 hover:bg-accent/30 text-accent font-bold text-xs border border-accent/30 transition-all flex items-center justify-center"
+              >
+                <Delete className="w-4 h-4" />
               </button>
               <button
                 type="button"
@@ -267,6 +304,13 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
                 className="py-2.5 rounded-xl bg-[#251C53] hover:bg-[#342775] text-zinc-200 text-xs font-semibold border border-[#3E2D82]"
               >
                 √
+              </button>
+              <button
+                type="button"
+                onClick={handlePercentage}
+                className="py-2.5 rounded-xl bg-[#251C53] hover:bg-[#342775] text-zinc-200 text-xs font-semibold border border-[#3E2D82]"
+              >
+                %
               </button>
               <button
                 type="button"
@@ -332,15 +376,8 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
 
               <button
                 type="button"
-                onClick={handlePercentage}
-                className="py-2.5 rounded-xl bg-[#251C53] hover:bg-[#342775] text-zinc-200 text-xs font-semibold border border-[#3E2D82]"
-              >
-                %
-              </button>
-              <button
-                type="button"
                 onClick={() => handleDigit("0")}
-                className="py-2.5 rounded-xl bg-[#1D1642] hover:bg-[#2A205E] text-white font-semibold text-sm border border-[#312564]"
+                className="col-span-2 py-2.5 rounded-xl bg-[#1D1642] hover:bg-[#2A205E] text-white font-semibold text-sm border border-[#312564]"
               >
                 0
               </button>
@@ -361,6 +398,10 @@ export function SmartWorkCalculator({ onClose }: SmartWorkCalculatorProps) {
             </div>
           </div>
         )}
+
+        {activeTab === "UNIT" && <CalculatorUnitConverter />}
+        {activeTab === "ENCODE" && <CalculatorEncodingTools />}
+        {activeTab === "JSON" && <CalculatorJsonFormatter />}
 
         {/* TAB 2: SPRINT & STORY POINTS ESTIMATOR */}
         {activeTab === "SPRINT" && (
