@@ -1343,7 +1343,7 @@ export function AppShell({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <UserCheck className="h-3.5 w-3.5 text-emerald-400" />
-                  Nhân sự tham gia dự án ({selectedMemberIds.length + 1} người)
+                  Nhân sự tham gia dự án ({new Set([...selectedMemberIds, user.id]).size} người)
                 </span>
                 <span className="text-[10px] text-muted italic">
                   * Bạn ({user.name}) tự động là Chủ dự án (Owner)

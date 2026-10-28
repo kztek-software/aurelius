@@ -44,6 +44,7 @@ export default function WelcomePage() {
   const [existingProjects, setExistingProjects] = useState<{ id: string; name: string; key: string; status?: string }[]>([]);
 
   const [canCreate, setCanCreate] = useState<boolean | null>(null);
+  const [currentUserId, setCurrentUserId] = useState("");
 
   useEffect(() => {
     // Tải thông tin người dùng và quyền hạn
@@ -54,6 +55,7 @@ export default function WelcomePage() {
           window.location.href = "/change-password";
           return;
         }
+        if (data.user?.id) setCurrentUserId(data.user.id);
         if (data.canCreateProject !== undefined) {
           setCanCreate(Boolean(data.canCreateProject));
         } else if (data.user) {
@@ -313,7 +315,10 @@ export default function WelcomePage() {
                 {selectedMemberIds.length > 0 && (
                   <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 pt-1">
                     <UserCheck className="h-3.5 w-3.5" />
-                    Đã tự động chọn {selectedMemberIds.length} nhân sự tham gia dự án
+                    Dự án sẽ có{" "}
+                    {new Set(selectedMemberIds).size +
+                      (currentUserId && selectedMemberIds.includes(currentUserId) ? 0 : 1)}{" "}
+                    nhân sự (gồm cả bạn)
                   </div>
                 )}
               </div>

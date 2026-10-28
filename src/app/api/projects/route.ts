@@ -100,7 +100,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (teamIds && teamIds.length > 0) {
+    // Giao diện đã tự chọn sẵn thành viên của team vào memberIds (người dùng có thể bỏ tick bớt),
+    // nên chỉ mở rộng teamIds khi client không gửi memberIds — tránh thêm lại người đã bị bỏ chọn
+    if (teamIds && teamIds.length > 0 && memberIds === undefined) {
       const teamMembers = await prisma.user.findMany({
         where: { teamId: { in: teamIds } },
         select: { id: true },
