@@ -1,17 +1,58 @@
 services:
+  db:
+    image: postgres:17-alpine
+    container_name: kztek-work-management-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-WorkingManager}
+      POSTGRES_USER: ${POSTGRES_USER:-kztek}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Cần đặt POSTGRES_PASSWORD trong .env}
+      # Collation ICU tiếng Việt để ORDER BY tên đúng thứ tự (locale "C" mặc định sắp theo byte)
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale-provider=icu --icu-locale=vi-VN"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Chạy 1 lần mỗi lần `docker compose up`: tạo/cập nhật bảng (prisma db push) + tạo admin.
+  # Lần cài đầu muốn có dữ liệu mẫu: đặt SEED_DEMO_DATA=true trong .env.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    image: kztek/work-management-migrate:latest
+    restart: "no"
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Cần đặt DATABASE_URL trong .env}
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    image: kztek/onemorek:latest
+    image: kztek/work-management:latest
     container_name: kztek-work-management
     restart: unless-stopped
     ports:
       - "3000:3000"
     # Nạp toàn bộ biến trong .env (SMTP_*, ZALO_*, DISCORD_*, COOKIE_SECURE...) vào container
     env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
-      # Nối tới SQL Server ngoài — KHÔNG ghi mật khẩu ở đây, đặt trong .env
+      # Nối tới PostgreSQL (service db ở trên, hoặc server ngoài) — KHÔNG ghi mật khẩu ở đây, đặt trong .env
       DATABASE_URL: ${DATABASE_URL:?Cần đặt DATABASE_URL trong .env}
       AUTH_SECRET: ${AUTH_SECRET:?Cần đặt AUTH_SECRET trong .env}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
@@ -20,4 +61,5 @@ services:
       - uploads-data:/app/public/uploads
 
 volumes:
+  postgres-data:
   uploads-data:

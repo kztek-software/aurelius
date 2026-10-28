@@ -59,7 +59,7 @@ export default function LoginPage() {
         document.cookie = `flowboard_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
         try { localStorage.setItem("flowboard_session", data.token); } catch {}
       }
-      window.location.href = "/";
+      window.location.href = data.user?.mustChangePassword ? "/change-password" : "/";
     } catch {
       setFormError("Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng.");
     } finally {
@@ -85,7 +85,7 @@ export default function LoginPage() {
           document.cookie = `flowboard_session=${d.token}; path=/; max-age=604800; SameSite=Lax`;
           try { localStorage.setItem("flowboard_session", d.token); } catch {}
         }
-        window.location.href = "/";
+        window.location.href = d.user?.mustChangePassword ? "/change-password" : "/";
       } else {
         setFormError(d.error ?? "Không thể đăng nhập vào tài khoản này.");
       }

@@ -23,6 +23,15 @@ export function verifyPassword(password: string, stored: string): boolean {
   return candidate.length === expected.length && timingSafeEqual(candidate, expected);
 }
 
+/** Sinh mật khẩu tạm ngẫu nhiên (bỏ các ký tự dễ nhầm như 0/O, 1/l/I) */
+export function generateTempPassword(length = 10): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  const bytes = randomBytes(length);
+  let out = "";
+  for (let i = 0; i < length; i++) out += chars[bytes[i] % chars.length];
+  return out;
+}
+
 export type SessionUser = {
   id: string;
   name: string;
@@ -30,6 +39,7 @@ export type SessionUser = {
   avatarColor: string;
   title: string | null;
   role?: string;
+  mustChangePassword?: boolean;
 };
 
 export async function createJwtToken(userId: string): Promise<string> {
@@ -122,7 +132,7 @@ export async function getSessionUser(req?: Request | null): Promise<SessionUser 
     if (!payload.sub) return null;
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, name: true, email: true, avatarColor: true, title: true, role: true },
+      select: { id: true, name: true, email: true, avatarColor: true, title: true, role: true, mustChangePassword: true },
     });
     return user;
   } catch (err) {

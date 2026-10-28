@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     const redirectUri = `${getAppBaseUrl()}/api/integrations/discord/oauth/callback`;
     const { discordUserId, discordUsername } = await exchangeDiscordAuthCode(code, redirectUri);
 
-    // discordUserId không có unique constraint ở DB (lý do NULL-uniqueness SQL Server) -> tự gỡ liên kết
+    // discordUserId là @unique -> phải gỡ liên kết
     // cũ (nếu tài khoản Discord này trước đó đã gắn với 1 user khác) trước khi gắn cho user hiện tại.
     await prisma.$transaction([
       prisma.user.updateMany({

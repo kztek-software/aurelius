@@ -39,6 +39,9 @@ export type SendMailOptions = {
   text?: string;
   type?: EmailLogType;
   metadata?: Record<string, unknown>;
+  // Nội dung lưu vào Outbox Log thay cho html/text thật (dùng khi email chứa thông tin nhạy cảm như mật khẩu)
+  logHtml?: string;
+  logText?: string;
 };
 
 export type TaskEmailPayload = {
@@ -308,8 +311,8 @@ export async function sendMail(options: SendMailOptions): Promise<EmailLogEntry>
     toName: options.toName,
     from,
     subject: options.subject,
-    html: options.html,
-    text: options.text,
+    html: options.logHtml ?? options.html,
+    text: options.logText ?? options.text,
     type: options.type || "SYSTEM",
     status: "SIMULATED",
     metadata: options.metadata,
@@ -865,3 +868,84 @@ export async function sendTestEmail(recipientEmail: string, recipientName: strin
   });
 }
 
+
+export type AccountCredentialsEmailPayload = {
+  recipientName: string;
+  recipientEmail: string;
+  password: string;
+  senderName: string;
+};
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Tạo mẫu HTML Email Thông tin Tài khoản (gửi tài khoản + mật khẩu khởi tạo)
+ */
+export function generateAccountCredentialsEmailHtml(payload: AccountCredentialsEmailPayload): string {
+  const loginUrl = `${getAppBaseUrl()}/login`;
+
+  const content = `
+    <div style="font-size: 18px; font-weight: 700; color: ${BRAND.primary}; margin-bottom: 12px;">
+      🔐 Thông tin tài khoản KZTEK Work
+    </div>
+    <div style="font-size: 14px; line-height: 1.6; color: ${BRAND.textMain};">
+      Xin chào <strong>${escapeHtml(payload.recipientName)}</strong>, quản trị viên <strong>${escapeHtml(payload.senderName)}</strong> đã cấp tài khoản truy cập hệ thống quản lý công việc KZTEK Work cho bạn.
+    </div>
+
+    <div class="card">
+      <table class="meta-table">
+        <tr>
+          <td class="meta-label">Tài khoản:</td>
+          <td class="meta-val" style="font-family: monospace;">${escapeHtml(payload.recipientEmail)}</td>
+        </tr>
+        <tr>
+          <td class="meta-label">Mật khẩu:</td>
+          <td class="meta-val" style="font-family: monospace; font-size: 15px; color: ${BRAND.accent};">${escapeHtml(payload.password)}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="font-size: 13px; line-height: 1.6; color: ${BRAND.textMuted};">
+      Vì lý do bảo mật, hệ thống sẽ <strong>yêu cầu bạn đổi mật khẩu</strong> ngay ở lần đăng nhập đầu tiên. Không chia sẻ email này cho người khác.
+    </div>
+
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="${loginUrl}" class="btn" target="_blank">
+        Đăng Nhập Ngay
+      </a>
+    </div>
+  `;
+
+  return wrapBaseLayout(
+    `[KZTEK Work] Thông tin tài khoản đăng nhập`,
+    `Tài khoản truy cập KZTEK Work của bạn đã sẵn sàng`,
+    content
+  );
+}
+
+/**
+ * Gửi email thông tin tài khoản + mật khẩu khởi tạo. Outbox Log chỉ lưu bản đã che mật khẩu.
+ */
+export async function sendAccountCredentialsEmail(payload: AccountCredentialsEmailPayload): Promise<EmailLogEntry> {
+  const loginUrl = `${getAppBaseUrl()}/login`;
+  const masked = { ...payload, password: "••••••••" };
+
+  return sendMail({
+    to: payload.recipientEmail,
+    toName: payload.recipientName,
+    subject: `[KZTEK Work] Thông tin tài khoản đăng nhập`,
+    html: generateAccountCredentialsEmailHtml(payload),
+    text: `Tài khoản: ${payload.recipientEmail} - Mật khẩu: ${payload.password}. Đăng nhập tại ${loginUrl} và đổi mật khẩu ở lần đăng nhập đầu tiên.`,
+    logHtml: generateAccountCredentialsEmailHtml(masked),
+    logText: `Tài khoản: ${payload.recipientEmail} - Mật khẩu: ${masked.password}. Đăng nhập tại ${loginUrl}.`,
+    type: "SYSTEM",
+    metadata: { kind: "ACCOUNT_CREDENTIALS", sender: payload.senderName },
+  });
+}

@@ -78,6 +78,12 @@ export default function MobileSimulatorPage() {
         return;
       }
 
+      if (data.user?.mustChangePassword) {
+        document.cookie = `flowboard_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+        window.location.href = "/change-password";
+        return;
+      }
+
       setToken(data.token);
       setCurrentUser(data.user);
       await loadInitialData(data.token);

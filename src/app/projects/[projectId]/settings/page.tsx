@@ -238,7 +238,7 @@ export default function AdminSettingsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        setSuccessMessage("✓ Lưu cấu hình hệ thống vào CSDL SQL Server thành công!");
+        setSuccessMessage("✓ Lưu cấu hình hệ thống vào CSDL PostgreSQL thành công!");
         if (data.config) {
           setConfig(data.config);
         }
@@ -399,7 +399,7 @@ export default function AdminSettingsPage() {
       <div className="flex h-full min-h-[400px] items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3 text-muted">
           <RefreshCw className="h-8 w-8 animate-spin text-accent" />
-          <p className="text-xs font-semibold">Đang tải cấu hình hệ thống từ SQL Server...</p>
+          <p className="text-xs font-semibold">Đang tải cấu hình hệ thống từ PostgreSQL...</p>
         </div>
       </div>
     );
@@ -473,7 +473,7 @@ export default function AdminSettingsPage() {
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>{successMessage}</span>
           </div>
-          <span className="text-[10px] font-mono opacity-70">Đã đồng bộ SQL Server</span>
+          <span className="text-[10px] font-mono opacity-70">Đã đồng bộ PostgreSQL</span>
         </div>
       )}
       {errorMessage && (
@@ -774,7 +774,7 @@ export default function AdminSettingsPage() {
               <div className="p-3 rounded-xl bg-accent/5 border border-accent/20 text-[11px] text-muted space-y-1">
                 <div className="font-bold text-accent">📌 Lưu ý về máy chủ gửi Email:</div>
                 <div>
-                  Toàn bộ cấu hình SMTP được lưu vào CSDL SQL Server và duy trì vĩnh viễn qua các lần khởi động lại máy chủ.
+                  Toàn bộ cấu hình SMTP được lưu vào CSDL PostgreSQL và duy trì vĩnh viễn qua các lần khởi động lại máy chủ.
                 </div>
               </div>
             </div>
@@ -1564,7 +1564,7 @@ export default function AdminSettingsPage() {
               <div className="flex justify-between py-2.5 border-b border-line/50">
                 <span className="text-muted font-medium">Cơ sở dữ liệu CSDL:</span>
                 <span className="font-bold font-mono text-emerald-600 flex items-center gap-1">
-                  <Database className="h-3.5 w-3.5" /> Microsoft SQL Server (WorkingManager)
+                  <Database className="h-3.5 w-3.5" /> PostgreSQL (WorkingManager)
                 </span>
               </div>
               <div className="flex justify-between py-2.5 border-b border-line/50">
@@ -1616,7 +1616,7 @@ export default function AdminSettingsPage() {
                 onClick={fetchConfig}
                 className="font-bold text-xs gap-1.5 bg-surface-2 hover:bg-line cursor-pointer h-9"
               >
-                <RefreshCw className="h-3.5 w-3.5" /> Đồng Bộ Lại Từ SQL Server
+                <RefreshCw className="h-3.5 w-3.5" /> Đồng Bộ Lại Từ PostgreSQL
               </Button>
             </div>
           </div>

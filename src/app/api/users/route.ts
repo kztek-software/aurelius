@@ -5,7 +5,7 @@ import { getSessionUser, hashPassword } from "@/lib/auth";
 
 const createUserSchema = z.object({
   name: z.string().min(1).max(100),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6),
   title: z.string().max(100).optional().nullable(),
   avatarColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default("#6366f1"),
@@ -78,6 +78,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email này đã được sử dụng" }, { status: 400 });
   }
 
+  // discordUserId là @unique — báo lỗi rõ ràng thay vì để DB ném P2002
+  if (discordUserId) {
+    const discordOwner = await prisma.user.findUnique({ where: { discordUserId } });
+    if (discordOwner) {
+      return NextResponse.json({ error: "Discord User ID này đã liên kết với người dùng khác" }, { status: 400 });
+    }
+  }
+
   const passwordHash = hashPassword(password);
 
   const newUser = await prisma.user.create({
@@ -85,6 +93,8 @@ export async function POST(req: NextRequest) {
       name,
       email,
       passwordHash,
+      // Tài khoản do Admin tạo -> buộc đổi mật khẩu khởi tạo ở lần đăng nhập đầu tiên
+      mustChangePassword: true,
       title: title || null,
       avatarColor,
       role,

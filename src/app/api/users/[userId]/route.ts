@@ -5,7 +5,7 @@ import { getSessionUser, hashPassword } from "@/lib/auth";
 
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  email: z.string().email().optional(),
+  email: z.string().trim().toLowerCase().email().optional(),
   password: z.string().min(6).optional(),
   title: z.string().max(100).nullable().optional(),
   avatarColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
@@ -49,6 +49,7 @@ export async function PATCH(
     name?: string;
     email?: string;
     passwordHash?: string;
+    mustChangePassword?: boolean;
     title?: string | null;
     avatarColor?: string;
     role?: string;
@@ -61,7 +62,11 @@ export async function PATCH(
 
   if (name) updateData.name = name;
   if (email) updateData.email = email;
-  if (password) updateData.passwordHash = hashPassword(password);
+  if (password) {
+    updateData.passwordHash = hashPassword(password);
+    // Admin đặt lại mật khẩu cho người khác -> buộc người đó đổi lại ở lần đăng nhập kế tiếp
+    updateData.mustChangePassword = currentUser.id !== userId;
+  }
   if (title !== undefined) updateData.title = title;
   if (avatarColor) updateData.avatarColor = avatarColor;
   if (role) updateData.role = role;

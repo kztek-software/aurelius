@@ -482,6 +482,7 @@ export type SprintCreateOrConnectWithoutProjectInput = {
 
 export type SprintCreateManyProjectInputEnvelope = {
   data: Prisma.SprintCreateManyProjectInput | Prisma.SprintCreateManyProjectInput[]
+  skipDuplicates?: boolean
 }
 
 export type SprintUpsertWithWhereUniqueWithoutProjectInput = {
@@ -661,7 +662,29 @@ export type SprintSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   _count?: boolean | Prisma.SprintCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sprint"]>
 
+export type SprintSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  projectId?: boolean
+  name?: boolean
+  goal?: boolean
+  status?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  createdAt?: boolean
+  project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["sprint"]>
 
+export type SprintSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  projectId?: boolean
+  name?: boolean
+  goal?: boolean
+  status?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  createdAt?: boolean
+  project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["sprint"]>
 
 export type SprintSelectScalar = {
   id?: boolean
@@ -679,6 +702,12 @@ export type SprintInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   tasks?: boolean | Prisma.Sprint$tasksArgs<ExtArgs>
   _count?: boolean | Prisma.SprintCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type SprintIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
+}
+export type SprintIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
 }
 
 export type $SprintPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -814,6 +843,30 @@ export interface SprintDelegate<ExtArgs extends runtime.Types.Extensions.Interna
   createMany<T extends SprintCreateManyArgs>(args?: Prisma.SelectSubset<T, SprintCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Sprints and returns the data saved in the database.
+   * @param {SprintCreateManyAndReturnArgs} args - Arguments to create many Sprints.
+   * @example
+   * // Create many Sprints
+   * const sprint = await prisma.sprint.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Sprints and only return the `id`
+   * const sprintWithIdOnly = await prisma.sprint.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends SprintCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SprintCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SprintPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Sprint.
    * @param {SprintDeleteArgs} args - Arguments to delete one Sprint.
    * @example
@@ -876,6 +929,36 @@ export interface SprintDelegate<ExtArgs extends runtime.Types.Extensions.Interna
    * 
    */
   updateMany<T extends SprintUpdateManyArgs>(args: Prisma.SelectSubset<T, SprintUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Sprints and returns the data updated in the database.
+   * @param {SprintUpdateManyAndReturnArgs} args - Arguments to update many Sprints.
+   * @example
+   * // Update many Sprints
+   * const sprint = await prisma.sprint.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Sprints and only return the `id`
+   * const sprintWithIdOnly = await prisma.sprint.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends SprintUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SprintUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SprintPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Sprint.
@@ -1309,6 +1392,30 @@ export type SprintCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * The data used to create many Sprints.
    */
   data: Prisma.SprintCreateManyInput | Prisma.SprintCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * Sprint createManyAndReturn
+ */
+export type SprintCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Sprint
+   */
+  select?: Prisma.SprintSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Sprint
+   */
+  omit?: Prisma.SprintOmit<ExtArgs> | null
+  /**
+   * The data used to create many Sprints.
+   */
+  data: Prisma.SprintCreateManyInput | Prisma.SprintCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SprintIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1353,6 +1460,36 @@ export type SprintUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Sprints to update.
    */
   limit?: number
+}
+
+/**
+ * Sprint updateManyAndReturn
+ */
+export type SprintUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Sprint
+   */
+  select?: Prisma.SprintSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Sprint
+   */
+  omit?: Prisma.SprintOmit<ExtArgs> | null
+  /**
+   * The data used to update Sprints.
+   */
+  data: Prisma.XOR<Prisma.SprintUpdateManyMutationInput, Prisma.SprintUncheckedUpdateManyInput>
+  /**
+   * Filter which Sprints to update
+   */
+  where?: Prisma.SprintWhereInput
+  /**
+   * Limit how many Sprints to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SprintIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

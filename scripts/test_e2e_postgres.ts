@@ -15,10 +15,10 @@ function verifyPassword(password: string, combined: string): boolean {
 
 async function runE2EVerification() {
   console.log("==================================================");
-  console.log("  KZTEK WORK MANAGEMENT: SQL SERVER E2E VERIFICATION");
+  console.log("  KZTEK WORK MANAGEMENT: POSTGRESQL E2E VERIFICATION");
   console.log("==================================================");
 
-  // 1. Verify Users in SQL Server
+  // 1. Verify Users in PostgreSQL
   console.log("\n1. Verifying Users & Authentication:");
   const users = await prisma.user.findMany();
   console.log(`  - Total Users found: ${users.length}`);
@@ -56,15 +56,15 @@ async function runE2EVerification() {
     console.log(`    * [${t.trackingCode}] ${t.title} (${t.status}) | ${t.comments.length} comments, converted: ${t.convertedTask ? `Task #${t.convertedTask.number}` : "None"}`);
   }
 
-  // 4. Test CRUD Transaction on SQL Server
-  console.log("\n4. Testing Realtime CRUD Transaction on SQL Server:");
+  // 4. Test CRUD Transaction on PostgreSQL
+  console.log("\n4. Testing Realtime CRUD Transaction on PostgreSQL:");
   const firstProject = projects[0];
   const testTask = await prisma.task.create({
     data: {
       projectId: firstProject.id,
       number: 9999,
-      title: "SQL Server Verification Test Task",
-      description: "Nhiệm vụ kiểm thử tự động ghi đọc trên CSDL Microsoft SQL Server",
+      title: "PostgreSQL Verification Test Task",
+      description: "Nhiệm vụ kiểm thử tự động ghi đọc trên CSDL Microsoft PostgreSQL",
       type: "TASK",
       status: "TODO",
       priority: "HIGH",
@@ -76,12 +76,12 @@ async function runE2EVerification() {
 
   const updatedTask = await prisma.task.update({
     where: { id: testTask.id },
-    data: { status: "DONE", description: "Đã hoàn thành kiểm thử trên SQL Server" },
+    data: { status: "DONE", description: "Đã hoàn thành kiểm thử trên PostgreSQL" },
   });
   console.log(`  - Updated test task status: ${updatedTask.status} (${updatedTask.description})`);
 
   await prisma.task.delete({ where: { id: testTask.id } });
-  console.log(`  - Deleted test task cleanly from SQL Server.`);
+  console.log(`  - Deleted test task cleanly from PostgreSQL.`);
 
   // 5. Verify Role Definitions
   console.log("\n5. Verifying Role Definitions Matrix:");
@@ -92,7 +92,7 @@ async function runE2EVerification() {
   }
 
   console.log("\n==================================================");
-  console.log("  ALL E2E TESTS PASSED ON MICROSOFT SQL SERVER! ✅");
+  console.log("  ALL E2E TESTS PASSED ON POSTGRESQL! ✅");
   console.log("==================================================");
 }
 

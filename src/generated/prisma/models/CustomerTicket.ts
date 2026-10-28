@@ -808,6 +808,7 @@ export type CustomerTicketCreateOrConnectWithoutProjectInput = {
 
 export type CustomerTicketCreateManyProjectInputEnvelope = {
   data: Prisma.CustomerTicketCreateManyProjectInput | Prisma.CustomerTicketCreateManyProjectInput[]
+  skipDuplicates?: boolean
 }
 
 export type CustomerTicketUpsertWithWhereUniqueWithoutProjectInput = {
@@ -1330,7 +1331,53 @@ export type CustomerTicketSelect<ExtArgs extends runtime.Types.Extensions.Intern
   _count?: boolean | Prisma.CustomerTicketCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customerTicket"]>
 
+export type CustomerTicketSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  trackingCode?: boolean
+  projectId?: boolean
+  title?: boolean
+  description?: boolean
+  type?: boolean
+  status?: boolean
+  priority?: boolean
+  customerName?: boolean
+  customerEmail?: boolean
+  customerPhone?: boolean
+  customerCompany?: boolean
+  environment?: boolean
+  convertedTaskId?: boolean
+  internalNotes?: boolean
+  resolutionNotes?: boolean
+  resolvedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  project?: boolean | Prisma.CustomerTicket$projectArgs<ExtArgs>
+  convertedTask?: boolean | Prisma.CustomerTicket$convertedTaskArgs<ExtArgs>
+}, ExtArgs["result"]["customerTicket"]>
 
+export type CustomerTicketSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  trackingCode?: boolean
+  projectId?: boolean
+  title?: boolean
+  description?: boolean
+  type?: boolean
+  status?: boolean
+  priority?: boolean
+  customerName?: boolean
+  customerEmail?: boolean
+  customerPhone?: boolean
+  customerCompany?: boolean
+  environment?: boolean
+  convertedTaskId?: boolean
+  internalNotes?: boolean
+  resolutionNotes?: boolean
+  resolvedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  project?: boolean | Prisma.CustomerTicket$projectArgs<ExtArgs>
+  convertedTask?: boolean | Prisma.CustomerTicket$convertedTaskArgs<ExtArgs>
+}, ExtArgs["result"]["customerTicket"]>
 
 export type CustomerTicketSelectScalar = {
   id?: boolean
@@ -1361,6 +1408,14 @@ export type CustomerTicketInclude<ExtArgs extends runtime.Types.Extensions.Inter
   comments?: boolean | Prisma.CustomerTicket$commentsArgs<ExtArgs>
   attachments?: boolean | Prisma.CustomerTicket$attachmentsArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerTicketCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CustomerTicketIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  project?: boolean | Prisma.CustomerTicket$projectArgs<ExtArgs>
+  convertedTask?: boolean | Prisma.CustomerTicket$convertedTaskArgs<ExtArgs>
+}
+export type CustomerTicketIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  project?: boolean | Prisma.CustomerTicket$projectArgs<ExtArgs>
+  convertedTask?: boolean | Prisma.CustomerTicket$convertedTaskArgs<ExtArgs>
 }
 
 export type $CustomerTicketPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1509,6 +1564,30 @@ export interface CustomerTicketDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends CustomerTicketCreateManyArgs>(args?: Prisma.SelectSubset<T, CustomerTicketCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many CustomerTickets and returns the data saved in the database.
+   * @param {CustomerTicketCreateManyAndReturnArgs} args - Arguments to create many CustomerTickets.
+   * @example
+   * // Create many CustomerTickets
+   * const customerTicket = await prisma.customerTicket.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many CustomerTickets and only return the `id`
+   * const customerTicketWithIdOnly = await prisma.customerTicket.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends CustomerTicketCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, CustomerTicketCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerTicketPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a CustomerTicket.
    * @param {CustomerTicketDeleteArgs} args - Arguments to delete one CustomerTicket.
    * @example
@@ -1571,6 +1650,36 @@ export interface CustomerTicketDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends CustomerTicketUpdateManyArgs>(args: Prisma.SelectSubset<T, CustomerTicketUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more CustomerTickets and returns the data updated in the database.
+   * @param {CustomerTicketUpdateManyAndReturnArgs} args - Arguments to update many CustomerTickets.
+   * @example
+   * // Update many CustomerTickets
+   * const customerTicket = await prisma.customerTicket.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more CustomerTickets and only return the `id`
+   * const customerTicketWithIdOnly = await prisma.customerTicket.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends CustomerTicketUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, CustomerTicketUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomerTicketPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one CustomerTicket.
@@ -2017,6 +2126,30 @@ export type CustomerTicketCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many CustomerTickets.
    */
   data: Prisma.CustomerTicketCreateManyInput | Prisma.CustomerTicketCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * CustomerTicket createManyAndReturn
+ */
+export type CustomerTicketCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomerTicket
+   */
+  select?: Prisma.CustomerTicketSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the CustomerTicket
+   */
+  omit?: Prisma.CustomerTicketOmit<ExtArgs> | null
+  /**
+   * The data used to create many CustomerTickets.
+   */
+  data: Prisma.CustomerTicketCreateManyInput | Prisma.CustomerTicketCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomerTicketIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -2061,6 +2194,36 @@ export type CustomerTicketUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many CustomerTickets to update.
    */
   limit?: number
+}
+
+/**
+ * CustomerTicket updateManyAndReturn
+ */
+export type CustomerTicketUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomerTicket
+   */
+  select?: Prisma.CustomerTicketSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the CustomerTicket
+   */
+  omit?: Prisma.CustomerTicketOmit<ExtArgs> | null
+  /**
+   * The data used to update CustomerTickets.
+   */
+  data: Prisma.XOR<Prisma.CustomerTicketUpdateManyMutationInput, Prisma.CustomerTicketUncheckedUpdateManyInput>
+  /**
+   * Filter which CustomerTickets to update
+   */
+  where?: Prisma.CustomerTicketWhereInput
+  /**
+   * Limit how many CustomerTickets to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomerTicketIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

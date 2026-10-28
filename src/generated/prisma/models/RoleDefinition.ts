@@ -407,7 +407,29 @@ export type RoleDefinitionSelect<ExtArgs extends runtime.Types.Extensions.Intern
   updatedAt?: boolean
 }, ExtArgs["result"]["roleDefinition"]>
 
+export type RoleDefinitionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  key?: boolean
+  name?: boolean
+  description?: boolean
+  color?: boolean
+  isSystem?: boolean
+  permissions?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+}, ExtArgs["result"]["roleDefinition"]>
 
+export type RoleDefinitionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  key?: boolean
+  name?: boolean
+  description?: boolean
+  color?: boolean
+  isSystem?: boolean
+  permissions?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+}, ExtArgs["result"]["roleDefinition"]>
 
 export type RoleDefinitionSelectScalar = {
   id?: boolean
@@ -554,6 +576,30 @@ export interface RoleDefinitionDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends RoleDefinitionCreateManyArgs>(args?: Prisma.SelectSubset<T, RoleDefinitionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many RoleDefinitions and returns the data saved in the database.
+   * @param {RoleDefinitionCreateManyAndReturnArgs} args - Arguments to create many RoleDefinitions.
+   * @example
+   * // Create many RoleDefinitions
+   * const roleDefinition = await prisma.roleDefinition.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many RoleDefinitions and only return the `id`
+   * const roleDefinitionWithIdOnly = await prisma.roleDefinition.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends RoleDefinitionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, RoleDefinitionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoleDefinitionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a RoleDefinition.
    * @param {RoleDefinitionDeleteArgs} args - Arguments to delete one RoleDefinition.
    * @example
@@ -616,6 +662,36 @@ export interface RoleDefinitionDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends RoleDefinitionUpdateManyArgs>(args: Prisma.SelectSubset<T, RoleDefinitionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more RoleDefinitions and returns the data updated in the database.
+   * @param {RoleDefinitionUpdateManyAndReturnArgs} args - Arguments to update many RoleDefinitions.
+   * @example
+   * // Update many RoleDefinitions
+   * const roleDefinition = await prisma.roleDefinition.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more RoleDefinitions and only return the `id`
+   * const roleDefinitionWithIdOnly = await prisma.roleDefinition.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends RoleDefinitionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, RoleDefinitionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoleDefinitionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one RoleDefinition.
@@ -1024,6 +1100,26 @@ export type RoleDefinitionCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many RoleDefinitions.
    */
   data: Prisma.RoleDefinitionCreateManyInput | Prisma.RoleDefinitionCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * RoleDefinition createManyAndReturn
+ */
+export type RoleDefinitionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RoleDefinition
+   */
+  select?: Prisma.RoleDefinitionSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the RoleDefinition
+   */
+  omit?: Prisma.RoleDefinitionOmit<ExtArgs> | null
+  /**
+   * The data used to create many RoleDefinitions.
+   */
+  data: Prisma.RoleDefinitionCreateManyInput | Prisma.RoleDefinitionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1052,6 +1148,32 @@ export type RoleDefinitionUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
  * RoleDefinition updateMany
  */
 export type RoleDefinitionUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update RoleDefinitions.
+   */
+  data: Prisma.XOR<Prisma.RoleDefinitionUpdateManyMutationInput, Prisma.RoleDefinitionUncheckedUpdateManyInput>
+  /**
+   * Filter which RoleDefinitions to update
+   */
+  where?: Prisma.RoleDefinitionWhereInput
+  /**
+   * Limit how many RoleDefinitions to update.
+   */
+  limit?: number
+}
+
+/**
+ * RoleDefinition updateManyAndReturn
+ */
+export type RoleDefinitionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RoleDefinition
+   */
+  select?: Prisma.RoleDefinitionSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the RoleDefinition
+   */
+  omit?: Prisma.RoleDefinitionOmit<ExtArgs> | null
   /**
    * The data used to update RoleDefinitions.
    */

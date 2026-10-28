@@ -3,7 +3,7 @@ import path from "node:path";
 import { prisma } from "@/lib/prisma";
 import type { SmtpConfig } from "@/lib/mail";
 
-// Cấu hình hệ thống được lưu vào bảng `SystemSetting` trong cơ sở dữ liệu SQL Server (qua Prisma)
+// Cấu hình hệ thống được lưu vào bảng `SystemSetting` trong cơ sở dữ liệu PostgreSQL (qua Prisma)
 // và được đồng bộ sao lưu ra file JSON `data/system-config.json` để đảm bảo:
 // 1. Không bị mất cấu hình khi service restart / container redeploy.
 // 2. Không bị phụ thuộc vào local filesystem nếu chạy trong môi trường phân tán / multi-instance.
@@ -273,7 +273,7 @@ function mapDbRecordToConfig(record: {
 }
 
 /**
- * Nạp cấu hình từ bảng `SystemSetting` trong cơ sở dữ liệu SQL Server.
+ * Nạp cấu hình từ bảng `SystemSetting` trong cơ sở dữ liệu PostgreSQL.
  * Nếu bảng chưa có bản ghi, tự động seed từ cấu hình disk/env hiện tại vào DB.
  */
 export async function loadSystemConfigFromDb(): Promise<SystemConfigData> {
@@ -338,7 +338,7 @@ export async function loadSystemConfigFromDb(): Promise<SystemConfigData> {
     currentSystemConfig = mapDbRecordToConfig(created);
     isDbLoaded = true;
     persistSystemConfigToDisk(currentSystemConfig);
-    console.log("⚙️ [SYSTEM CONFIG] Đã khởi tạo bản ghi SystemSetting đầu tiên trong SQL Server Database.");
+    console.log("⚙️ [SYSTEM CONFIG] Đã khởi tạo bản ghi SystemSetting đầu tiên trong PostgreSQL Database.");
     return { ...currentSystemConfig };
   } catch (error) {
     console.error("⚠️ Lỗi khi nạp cấu hình từ bảng SystemSetting DB, dùng disk cache:", error);
@@ -482,7 +482,7 @@ export type SystemConfigUpdateInput = {
 };
 
 /**
- * Cập nhật cấu hình hệ thống vào SQL Server Database và bộ nhớ đệm (Chỉ Admin)
+ * Cập nhật cấu hình hệ thống vào PostgreSQL Database và bộ nhớ đệm (Chỉ Admin)
  */
 export async function updateSystemConfigAsync(
   updates: SystemConfigUpdateInput,
@@ -663,7 +663,7 @@ export async function updateSystemConfigAsync(
     currentSystemConfig = mapDbRecordToConfig(savedSetting);
     isDbLoaded = true;
   } catch (error) {
-    console.error("⚠️ Lỗi khi lưu cấu hình vào SQL Server DB, fallback lưu disk cache:", error);
+    console.error("⚠️ Lỗi khi lưu cấu hình vào PostgreSQL DB, fallback lưu disk cache:", error);
     currentSystemConfig = {
       smtp: newSmtp,
       branding: newBranding,
@@ -683,7 +683,7 @@ export async function updateSystemConfigAsync(
 }
 
 /**
- * Ghi access_token/refresh_token Zalo OA vào SQL Server (do OAuth callback / cơ chế tự refresh gọi,
+ * Ghi access_token/refresh_token Zalo OA vào PostgreSQL (do OAuth callback / cơ chế tự refresh gọi,
  * KHÔNG đi qua form Cài đặt Admin để tránh việc admin bấm "Lưu" đè mất token vừa lấy được).
  */
 export async function updateZaloTokensAsync(tokens: {
@@ -709,7 +709,7 @@ export async function updateZaloTokensAsync(tokens: {
     currentSystemConfig = mapDbRecordToConfig(savedSetting);
     persistSystemConfigToDisk(currentSystemConfig);
   } catch (error) {
-    console.error("⚠️ Lỗi khi lưu Zalo access token vào SQL Server DB:", error);
+    console.error("⚠️ Lỗi khi lưu Zalo access token vào PostgreSQL DB:", error);
     throw error;
   }
 }
