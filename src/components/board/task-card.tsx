@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Calendar, MessageSquare, CheckSquare, AlertTriangle, Plus, Check } from "lucide-react";
 import { format } from "date-fns";
-import type { TaskDto, MemberDto } from "@/lib/types";
+import type { TaskDto, MemberDto, TaskProjectTag } from "@/lib/types";
 import { priorityMeta, typeMeta } from "@/lib/constants";
 import { Avatar, AvatarFallback, initials } from "@/components/ui/avatar";
 import {
@@ -19,11 +19,14 @@ function TaskCardComponent({
   overlay,
   members,
   onAssign,
+  projectTag,
 }: {
   task: TaskDto;
   overlay?: boolean;
   members?: MemberDto[];
   onAssign?: (taskId: string, userId: string | null) => void;
+  // Chỉ truyền khi Board đang xem nhiều dự án — hiển thị mã dự án để phân biệt
+  projectTag?: TaskProjectTag;
 }) {
   const priority = priorityMeta(task.priority);
   const type = typeMeta(task.type);
@@ -72,6 +75,14 @@ function TaskCardComponent({
       <div className="mb-1.5 flex items-center justify-between gap-1.5">
         <div className="flex min-w-0 items-center gap-1.5">
           <TypeIcon type={task.type} />
+          {projectTag && (
+            <span
+              className="shrink-0 rounded px-1 py-0.2 text-[9.5px] font-mono font-bold bg-surface-3 border border-line-strong text-muted-light"
+              title={`Dự án: ${projectTag.name}`}
+            >
+              {projectTag.key}
+            </span>
+          )}
           <span className="truncate text-[10.5px] font-bold text-muted">
             #{task.number} · {type.label}
           </span>
@@ -191,6 +202,7 @@ export const TaskCard = memo(TaskCardComponent, (prev, next) => {
     prev.task.subtasks?.length === next.task.subtasks?.length &&
     prev.task.labels?.length === next.task.labels?.length &&
     prev.members === next.members &&
-    prev.onAssign === next.onAssign
+    prev.onAssign === next.onAssign &&
+    prev.projectTag === next.projectTag
   );
 });
