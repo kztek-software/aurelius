@@ -652,10 +652,6 @@ export type UserNotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput =
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserNotificationPreferenceUpdateToOneWithWhereWithoutUserInput, Prisma.UserNotificationPreferenceUpdateWithoutUserInput>, Prisma.UserNotificationPreferenceUncheckedUpdateWithoutUserInput>
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type UserNotificationPreferenceCreateWithoutUserInput = {
   id?: string
   emailOnAssign?: boolean

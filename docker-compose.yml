@@ -19,11 +19,27 @@ services:
       timeout: 5s
       retries: 10
 
+  # Chạy 1 lần mỗi lần `docker compose up`: tạo/cập nhật bảng (prisma db push) + tạo admin.
+  # Lần cài đầu muốn có dữ liệu mẫu: đặt SEED_DEMO_DATA=true trong .env.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    image: kztek/work-management-migrate:latest
+    restart: "no"
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Cần đặt DATABASE_URL trong .env}
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    image: kztek/onemorek:latest
+    image: kztek/work-management:latest
     container_name: kztek-work-management
     restart: unless-stopped
     ports:
@@ -33,6 +49,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       # Nối tới PostgreSQL (service db ở trên, hoặc server ngoài) — KHÔNG ghi mật khẩu ở đây, đặt trong .env
       DATABASE_URL: ${DATABASE_URL:?Cần đặt DATABASE_URL trong .env}

@@ -38,6 +38,22 @@ ENV DATABASE_URL=${DATABASE_URL}
 
 RUN npm run build
 
+# --- Stage migrate — tạo/cập nhật bảng + seed admin (service `migrate` trong
+# docker-compose.yml chạy 1 lần trước app). Image runner standalone không có
+# Prisma CLI nên cần stage riêng. Dữ liệu mẫu chỉ tạo khi SEED_DEMO_DATA=true.
+FROM node:${NODE_VERSION}-bookworm-slim AS migrate
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/src/generated ./src/generated
+COPY package.json prisma.config.ts tsconfig.json ./
+COPY prisma ./prisma
+COPY src/lib/prisma.ts ./src/lib/prisma.ts
+
+# db push KHÔNG dùng --accept-data-loss: nếu thay đổi schema làm mất dữ liệu thì
+# dừng lại báo lỗi (app không khởi động) thay vì tự xoá cột/bảng.
+CMD ["sh", "-c", "npx prisma db push && npx tsx prisma/seed.ts"]
+
 # --- Stage 3: runner — image production tối giản ---------------------------
 FROM node:${NODE_VERSION}-bookworm-slim AS runner
 WORKDIR /app

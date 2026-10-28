@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       return new Response(null, {
         status: 303,
         headers: {
-          Location: "/",
+          Location: user.mustChangePassword ? "/change-password" : "/",
           "Set-Cookie": `flowboard_session=${token}; Path=/; Max-Age=604800; SameSite=Lax`,
         },
       });
@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
         avatarColor: user.avatarColor,
         title: user.title,
         role: user.role,
+        mustChangePassword: user.mustChangePassword,
       },
     });
 

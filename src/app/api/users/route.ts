@@ -93,6 +93,8 @@ export async function POST(req: NextRequest) {
       name,
       email,
       passwordHash,
+      // Tài khoản do Admin tạo -> buộc đổi mật khẩu khởi tạo ở lần đăng nhập đầu tiên
+      mustChangePassword: true,
       title: title || null,
       avatarColor,
       role,

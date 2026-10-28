@@ -50,6 +50,10 @@ export default function WelcomePage() {
     fetch("/api/auth/me")
       .then((res) => res.json())
       .then((data) => {
+        if (data.user?.mustChangePassword) {
+          window.location.href = "/change-password";
+          return;
+        }
         if (data.canCreateProject !== undefined) {
           setCanCreate(Boolean(data.canCreateProject));
         } else if (data.user) {

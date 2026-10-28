@@ -14,6 +14,7 @@ export default async function ProjectLayout({
   const { projectId } = await params;
   const user = await getSessionUser();
   if (!user) redirect("/login");
+  if (user.mustChangePassword) redirect("/change-password");
 
   const [initialProject, projects] = await Promise.all([
     prisma.project.findFirst({
