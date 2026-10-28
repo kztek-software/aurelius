@@ -1,0 +1,134 @@
+name: Deploy
+
+# Deploy theo tag:
+#   staging-*  → môi trường staging    (image :latest)
+#   release-*  → môi trường production (image :stable)
+# Tag chỉ được chấp nhận khi commit được đánh tag nằm trên nhánh main.
+on:
+  push:
+    tags:
+      - "staging-*"
+      - "release-*"
+
+concurrency:
+  # Staging và production có hàng đợi riêng. Production không cancel giữa
+  # chừng để tránh một lần deploy bị cắt ngang.
+  group: deploy-${{ startsWith(github.ref_name, 'release-') && 'production' || 'staging' }}
+  cancel-in-progress: ${{ !startsWith(github.ref_name, 'release-') }}
+
+env:
+  # Phải là chữ thường — Docker repository name không cho phép chữ hoa.
+  IMAGE_NAME: kztek/kztek-workmanagement
+
+jobs:
+  verify-main:
+    name: Verify tag is on main
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      channel_tag: ${{ steps.env.outputs.channel_tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Cần full history để kiểm tra commit có thuộc main hay không.
+          fetch-depth: 0
+
+      # Push tag không có filter theo nhánh, nên phải tự kiểm tra: commit của
+      # tag phải là tổ tiên (hoặc chính là) HEAD của origin/main.
+      - name: Ensure tagged commit is on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} trỏ tới commit ${GITHUB_SHA} không nằm trên nhánh main — bỏ qua deploy."
+            exit 1
+          fi
+
+      - name: Resolve target environment
+        id: env
+        run: |
+          case "$GITHUB_REF_NAME" in
+            release-*) echo "environment=production" >> "$GITHUB_OUTPUT"
+                       echo "channel_tag=stable" >> "$GITHUB_OUTPUT" ;;
+            staging-*) echo "environment=staging" >> "$GITHUB_OUTPUT"
+                       echo "channel_tag=latest" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::Tag không hợp lệ: $GITHUB_REF_NAME"; exit 1 ;;
+          esac
+
+  build-and-deploy:
+    name: Lint, build & push image, trigger deploy (${{ needs.verify-main.outputs.environment }})
+    needs: verify-main
+    runs-on: ubuntu-latest
+    # DOCKERHUB_* dùng chung; webhook tách riêng theo môi trường (xem bước
+    # "Trigger deploying webhook").
+    environment: ${{ needs.verify-main.outputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # `npm run build` không chạy riêng ở đây nữa: Dockerfile stage `builder`
+      # đã chạy đúng lệnh đó, nên build lỗi vẫn làm job fail mà không mất thời
+      # gian build hai lần.
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ needs.verify-main.outputs.channel_tag }}
+            type=ref,event=tag
+            type=sha,prefix=sha-
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Cache layer giữa các lần chạy để không phải npm ci + next build lại từ đầu
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Chỉ gọi webhook SAU KHI image đã nằm trên registry, để server deploy
+      # luôn pull được image vừa build (`:latest` cho staging, `:stable` cho production).
+      # Mỗi môi trường có webhook riêng:
+      #   staging    → STAGING_WEBHOOK_URL / STAGING_WEBHOOK_TOKEN
+      #   production → PROD_WEBHOOK_URL    / PROD_WEBHOOK_TOKEN
+      - name: Trigger deploying webhook
+        env:
+          WEBHOOK_URL: ${{ needs.verify-main.outputs.environment == 'production' && secrets.PROD_WEBHOOK_URL || secrets.STAGING_WEBHOOK_URL }}
+          WEBHOOK_TOKEN: ${{ needs.verify-main.outputs.environment == 'production' && secrets.PROD_WEBHOOK_TOKEN || secrets.STAGING_WEBHOOK_TOKEN }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ] || [ -z "$WEBHOOK_TOKEN" ]; then
+            echo "::error::Thiếu secret webhook cho môi trường ${{ needs.verify-main.outputs.environment }}"
+            exit 1
+          fi
+          curl -sSf -X POST \
+            "$WEBHOOK_URL" \
+            -H "X-Hub-Signature: $WEBHOOK_TOKEN"
