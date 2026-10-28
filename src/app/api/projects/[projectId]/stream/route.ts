@@ -16,7 +16,8 @@ export async function GET(
   const member = await prisma.projectMember.findUnique({
     where: { projectId_userId: { projectId, userId: user.id } },
   });
-  if (!member) return new Response("Forbidden", { status: 403 });
+  // ADMIN hệ thống được xem mọi dự án — đồng bộ với GET /api/projects/[projectId]/tasks
+  if (!member && user.role !== "ADMIN") return new Response("Forbidden", { status: 403 });
 
   const encoder = new TextEncoder();
   let unsubscribe: (() => void) | null = null;
