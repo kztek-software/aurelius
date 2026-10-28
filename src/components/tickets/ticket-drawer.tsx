@@ -36,6 +36,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { boardHref } from "@/lib/board-link";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { MediaGallery } from "@/components/ui/media-gallery";
@@ -475,7 +476,7 @@ export function TicketDrawer({
                     Đã chuyển đổi: <strong>Task #{ticket.convertedTask.number}</strong> ({ticket.convertedTask.status})
                   </span>
                   <Link
-                    href={`/projects/${projectId}/board`}
+                    href={boardHref(projectId)}
                     className="ml-1 text-accent hover:underline font-bold"
                   >
                     Xem Board

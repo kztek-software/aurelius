@@ -50,6 +50,7 @@ import { canManageMembers } from "@/lib/permissions";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { ProjectDashboardData } from "@/lib/types";
 import { useTabCache } from "@/lib/tab-cache";
+import { boardHref } from "@/lib/board-link";
 import { ProjectAttachmentGallery } from "@/components/project/project-attachment-gallery";
 import { useIsClient } from "@/lib/client-store";
 
@@ -274,7 +275,7 @@ export default function ProjectDashboardPage() {
               <RefreshCw className="h-3.5 w-3.5 mr-1" /> Thử lại
             </Button>
             <Link
-              href={`/projects/${projectId}/board`}
+              href={boardHref(projectId)}
               className="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md border border-line bg-surface hover:bg-surface-2 text-xs font-semibold text-foreground transition-colors cursor-pointer"
             >
               <KanbanSquare className="h-3.5 w-3.5" /> Mở Board
@@ -392,7 +393,7 @@ export default function ProjectDashboardPage() {
           </Button>
 
           <Link
-            href={`/projects/${projectId}/board`}
+            href={boardHref(projectId)}
             className="h-8.5 sm:h-9 px-3.5 text-xs font-bold bg-accent hover:bg-accent/90 text-white shadow-md shadow-accent/25 gap-1.5 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors shrink-0"
           >
             <KanbanSquare className="h-3.5 w-3.5" />
@@ -644,7 +645,7 @@ export default function ProjectDashboardPage() {
                 <span>Công việc cần xử lý gấp ({urgentAndOverdueTasks.length})</span>
               </div>
               <Link
-                href={`/projects/${projectId}/board`}
+                href={boardHref(projectId)}
                 className="px-2 py-0.5 rounded-md bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 text-[10px] font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
               >
                 Mở Board <ArrowUpRight className="h-3 w-3" />

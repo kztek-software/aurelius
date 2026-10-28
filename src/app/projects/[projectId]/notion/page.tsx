@@ -21,6 +21,7 @@ import type { NotionDatabaseInfo, NotionTaskItem } from "@/lib/notion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { boardHref } from "@/lib/board-link";
 
 export default function NotionMigrationPage() {
   const params = useParams<{ projectId: string }>();
@@ -288,7 +289,7 @@ export default function NotionMigrationPage() {
             </div>
             <Button
               size="sm"
-              onClick={() => router.push(`/projects/${projectId}/board`)}
+              onClick={() => router.push(boardHref(projectId))}
               className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500 text-white"
             >
               Xem trên Board →

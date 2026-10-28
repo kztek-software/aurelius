@@ -125,8 +125,8 @@ export function CommandPalette({
       icon: KanbanSquare,
       action: () => {
         onClose();
-        if (projectId) router.push(`/projects/${projectId}/board`);
-        else router.push("/");
+        // Board Công Việc là route cấp ngoài, tự nhớ lựa chọn dự án gần nhất
+        router.push("/board");
       },
     },
     {
