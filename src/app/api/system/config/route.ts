@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
     }
 
     const updatedConfig = await updateSystemConfigAsync(parsed.data, user.name);
-    console.log("  ✅ Đã lưu SQL Server thành công! App URL mới:", updatedConfig.branding?.appUrl);
+    console.log("  ✅ Đã lưu PostgreSQL thành công! App URL mới:", updatedConfig.branding?.appUrl);
 
     return NextResponse.json({
       success: true,

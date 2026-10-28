@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
           { email: input === "admin" ? "admin@kztek.net" : input },
           { email: `${input}@kztek.net` },
           { email: `${input}@demo.dev` },
-          { name: { equals: input } },
+          // PostgreSQL so sánh chuỗi phân biệt hoa/thường (khác SQL Server) — `input` đã lowercase nên cần insensitive
+          { name: { equals: input, mode: "insensitive" } },
         ],
       },
     });

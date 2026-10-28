@@ -781,7 +781,51 @@ export type UserNotificationPreferenceSelect<ExtArgs extends runtime.Types.Exten
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userNotificationPreference"]>
 
+export type UserNotificationPreferenceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  emailOnAssign?: boolean
+  emailOnStatusChange?: boolean
+  emailOnComment?: boolean
+  emailOnMention?: boolean
+  zaloOnAssign?: boolean
+  zaloOnStatusChange?: boolean
+  zaloOnComment?: boolean
+  zaloOnMention?: boolean
+  inAppOnAssign?: boolean
+  inAppOnStatusChange?: boolean
+  inAppOnComment?: boolean
+  inAppOnMention?: boolean
+  discordOnAssign?: boolean
+  discordOnStatusChange?: boolean
+  discordOnComment?: boolean
+  discordOnMention?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["userNotificationPreference"]>
 
+export type UserNotificationPreferenceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  emailOnAssign?: boolean
+  emailOnStatusChange?: boolean
+  emailOnComment?: boolean
+  emailOnMention?: boolean
+  zaloOnAssign?: boolean
+  zaloOnStatusChange?: boolean
+  zaloOnComment?: boolean
+  zaloOnMention?: boolean
+  inAppOnAssign?: boolean
+  inAppOnStatusChange?: boolean
+  inAppOnComment?: boolean
+  inAppOnMention?: boolean
+  discordOnAssign?: boolean
+  discordOnStatusChange?: boolean
+  discordOnComment?: boolean
+  discordOnMention?: boolean
+  updatedAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["userNotificationPreference"]>
 
 export type UserNotificationPreferenceSelectScalar = {
   id?: boolean
@@ -807,6 +851,12 @@ export type UserNotificationPreferenceSelectScalar = {
 
 export type UserNotificationPreferenceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "emailOnAssign" | "emailOnStatusChange" | "emailOnComment" | "emailOnMention" | "zaloOnAssign" | "zaloOnStatusChange" | "zaloOnComment" | "zaloOnMention" | "inAppOnAssign" | "inAppOnStatusChange" | "inAppOnComment" | "inAppOnMention" | "discordOnAssign" | "discordOnStatusChange" | "discordOnComment" | "discordOnMention" | "updatedAt", ExtArgs["result"]["userNotificationPreference"]>
 export type UserNotificationPreferenceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type UserNotificationPreferenceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type UserNotificationPreferenceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -953,6 +1003,30 @@ export interface UserNotificationPreferenceDelegate<ExtArgs extends runtime.Type
   createMany<T extends UserNotificationPreferenceCreateManyArgs>(args?: Prisma.SelectSubset<T, UserNotificationPreferenceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many UserNotificationPreferences and returns the data saved in the database.
+   * @param {UserNotificationPreferenceCreateManyAndReturnArgs} args - Arguments to create many UserNotificationPreferences.
+   * @example
+   * // Create many UserNotificationPreferences
+   * const userNotificationPreference = await prisma.userNotificationPreference.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many UserNotificationPreferences and only return the `id`
+   * const userNotificationPreferenceWithIdOnly = await prisma.userNotificationPreference.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends UserNotificationPreferenceCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, UserNotificationPreferenceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserNotificationPreferencePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a UserNotificationPreference.
    * @param {UserNotificationPreferenceDeleteArgs} args - Arguments to delete one UserNotificationPreference.
    * @example
@@ -1015,6 +1089,36 @@ export interface UserNotificationPreferenceDelegate<ExtArgs extends runtime.Type
    * 
    */
   updateMany<T extends UserNotificationPreferenceUpdateManyArgs>(args: Prisma.SelectSubset<T, UserNotificationPreferenceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more UserNotificationPreferences and returns the data updated in the database.
+   * @param {UserNotificationPreferenceUpdateManyAndReturnArgs} args - Arguments to update many UserNotificationPreferences.
+   * @example
+   * // Update many UserNotificationPreferences
+   * const userNotificationPreference = await prisma.userNotificationPreference.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more UserNotificationPreferences and only return the `id`
+   * const userNotificationPreferenceWithIdOnly = await prisma.userNotificationPreference.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends UserNotificationPreferenceUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, UserNotificationPreferenceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserNotificationPreferencePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one UserNotificationPreference.
@@ -1458,6 +1562,30 @@ export type UserNotificationPreferenceCreateManyArgs<ExtArgs extends runtime.Typ
    * The data used to create many UserNotificationPreferences.
    */
   data: Prisma.UserNotificationPreferenceCreateManyInput | Prisma.UserNotificationPreferenceCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * UserNotificationPreference createManyAndReturn
+ */
+export type UserNotificationPreferenceCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserNotificationPreference
+   */
+  select?: Prisma.UserNotificationPreferenceSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserNotificationPreference
+   */
+  omit?: Prisma.UserNotificationPreferenceOmit<ExtArgs> | null
+  /**
+   * The data used to create many UserNotificationPreferences.
+   */
+  data: Prisma.UserNotificationPreferenceCreateManyInput | Prisma.UserNotificationPreferenceCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserNotificationPreferenceIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1502,6 +1630,36 @@ export type UserNotificationPreferenceUpdateManyArgs<ExtArgs extends runtime.Typ
    * Limit how many UserNotificationPreferences to update.
    */
   limit?: number
+}
+
+/**
+ * UserNotificationPreference updateManyAndReturn
+ */
+export type UserNotificationPreferenceUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserNotificationPreference
+   */
+  select?: Prisma.UserNotificationPreferenceSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserNotificationPreference
+   */
+  omit?: Prisma.UserNotificationPreferenceOmit<ExtArgs> | null
+  /**
+   * The data used to update UserNotificationPreferences.
+   */
+  data: Prisma.XOR<Prisma.UserNotificationPreferenceUpdateManyMutationInput, Prisma.UserNotificationPreferenceUncheckedUpdateManyInput>
+  /**
+   * Filter which UserNotificationPreferences to update
+   */
+  where?: Prisma.UserNotificationPreferenceWhereInput
+  /**
+   * Limit how many UserNotificationPreferences to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserNotificationPreferenceIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

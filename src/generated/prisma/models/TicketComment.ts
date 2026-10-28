@@ -452,6 +452,7 @@ export type TicketCommentCreateOrConnectWithoutTicketInput = {
 
 export type TicketCommentCreateManyTicketInputEnvelope = {
   data: Prisma.TicketCommentCreateManyTicketInput | Prisma.TicketCommentCreateManyTicketInput[]
+  skipDuplicates?: boolean
 }
 
 export type TicketCommentUpsertWithWhereUniqueWithoutTicketInput = {
@@ -538,7 +539,29 @@ export type TicketCommentSelect<ExtArgs extends runtime.Types.Extensions.Interna
   ticket?: boolean | Prisma.CustomerTicketDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ticketComment"]>
 
+export type TicketCommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  ticketId?: boolean
+  authorName?: boolean
+  authorEmail?: boolean
+  isStaff?: boolean
+  isInternalOnly?: boolean
+  message?: boolean
+  createdAt?: boolean
+  ticket?: boolean | Prisma.CustomerTicketDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["ticketComment"]>
 
+export type TicketCommentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  ticketId?: boolean
+  authorName?: boolean
+  authorEmail?: boolean
+  isStaff?: boolean
+  isInternalOnly?: boolean
+  message?: boolean
+  createdAt?: boolean
+  ticket?: boolean | Prisma.CustomerTicketDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["ticketComment"]>
 
 export type TicketCommentSelectScalar = {
   id?: boolean
@@ -553,6 +576,12 @@ export type TicketCommentSelectScalar = {
 
 export type TicketCommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ticketId" | "authorName" | "authorEmail" | "isStaff" | "isInternalOnly" | "message" | "createdAt", ExtArgs["result"]["ticketComment"]>
 export type TicketCommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  ticket?: boolean | Prisma.CustomerTicketDefaultArgs<ExtArgs>
+}
+export type TicketCommentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  ticket?: boolean | Prisma.CustomerTicketDefaultArgs<ExtArgs>
+}
+export type TicketCommentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ticket?: boolean | Prisma.CustomerTicketDefaultArgs<ExtArgs>
 }
 
@@ -688,6 +717,30 @@ export interface TicketCommentDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends TicketCommentCreateManyArgs>(args?: Prisma.SelectSubset<T, TicketCommentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many TicketComments and returns the data saved in the database.
+   * @param {TicketCommentCreateManyAndReturnArgs} args - Arguments to create many TicketComments.
+   * @example
+   * // Create many TicketComments
+   * const ticketComment = await prisma.ticketComment.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many TicketComments and only return the `id`
+   * const ticketCommentWithIdOnly = await prisma.ticketComment.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends TicketCommentCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, TicketCommentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketCommentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a TicketComment.
    * @param {TicketCommentDeleteArgs} args - Arguments to delete one TicketComment.
    * @example
@@ -750,6 +803,36 @@ export interface TicketCommentDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends TicketCommentUpdateManyArgs>(args: Prisma.SelectSubset<T, TicketCommentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more TicketComments and returns the data updated in the database.
+   * @param {TicketCommentUpdateManyAndReturnArgs} args - Arguments to update many TicketComments.
+   * @example
+   * // Update many TicketComments
+   * const ticketComment = await prisma.ticketComment.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more TicketComments and only return the `id`
+   * const ticketCommentWithIdOnly = await prisma.ticketComment.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends TicketCommentUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, TicketCommentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketCommentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one TicketComment.
@@ -1182,6 +1265,30 @@ export type TicketCommentCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many TicketComments.
    */
   data: Prisma.TicketCommentCreateManyInput | Prisma.TicketCommentCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * TicketComment createManyAndReturn
+ */
+export type TicketCommentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TicketComment
+   */
+  select?: Prisma.TicketCommentSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the TicketComment
+   */
+  omit?: Prisma.TicketCommentOmit<ExtArgs> | null
+  /**
+   * The data used to create many TicketComments.
+   */
+  data: Prisma.TicketCommentCreateManyInput | Prisma.TicketCommentCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TicketCommentIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1226,6 +1333,36 @@ export type TicketCommentUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many TicketComments to update.
    */
   limit?: number
+}
+
+/**
+ * TicketComment updateManyAndReturn
+ */
+export type TicketCommentUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TicketComment
+   */
+  select?: Prisma.TicketCommentSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the TicketComment
+   */
+  omit?: Prisma.TicketCommentOmit<ExtArgs> | null
+  /**
+   * The data used to update TicketComments.
+   */
+  data: Prisma.XOR<Prisma.TicketCommentUpdateManyMutationInput, Prisma.TicketCommentUncheckedUpdateManyInput>
+  /**
+   * Filter which TicketComments to update
+   */
+  where?: Prisma.TicketCommentWhereInput
+  /**
+   * Limit how many TicketComments to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TicketCommentIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

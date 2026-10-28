@@ -524,6 +524,7 @@ export type DiscordMessageLogCreateOrConnectWithoutUserInput = {
 
 export type DiscordMessageLogCreateManyUserInputEnvelope = {
   data: Prisma.DiscordMessageLogCreateManyUserInput | Prisma.DiscordMessageLogCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type DiscordMessageLogUpsertWithWhereUniqueWithoutUserInput = {
@@ -628,7 +629,35 @@ export type DiscordMessageLogSelect<ExtArgs extends runtime.Types.Extensions.Int
   user?: boolean | Prisma.DiscordMessageLog$userArgs<ExtArgs>
 }, ExtArgs["result"]["discordMessageLog"]>
 
+export type DiscordMessageLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  discordUserId?: boolean
+  channel?: boolean
+  notificationType?: boolean
+  content?: boolean
+  status?: boolean
+  providerMsgId?: boolean
+  errorMessage?: boolean
+  createdAt?: boolean
+  sentAt?: boolean
+  user?: boolean | Prisma.DiscordMessageLog$userArgs<ExtArgs>
+}, ExtArgs["result"]["discordMessageLog"]>
 
+export type DiscordMessageLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  discordUserId?: boolean
+  channel?: boolean
+  notificationType?: boolean
+  content?: boolean
+  status?: boolean
+  providerMsgId?: boolean
+  errorMessage?: boolean
+  createdAt?: boolean
+  sentAt?: boolean
+  user?: boolean | Prisma.DiscordMessageLog$userArgs<ExtArgs>
+}, ExtArgs["result"]["discordMessageLog"]>
 
 export type DiscordMessageLogSelectScalar = {
   id?: boolean
@@ -646,6 +675,12 @@ export type DiscordMessageLogSelectScalar = {
 
 export type DiscordMessageLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "discordUserId" | "channel" | "notificationType" | "content" | "status" | "providerMsgId" | "errorMessage" | "createdAt" | "sentAt", ExtArgs["result"]["discordMessageLog"]>
 export type DiscordMessageLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.DiscordMessageLog$userArgs<ExtArgs>
+}
+export type DiscordMessageLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.DiscordMessageLog$userArgs<ExtArgs>
+}
+export type DiscordMessageLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.DiscordMessageLog$userArgs<ExtArgs>
 }
 
@@ -784,6 +819,30 @@ export interface DiscordMessageLogDelegate<ExtArgs extends runtime.Types.Extensi
   createMany<T extends DiscordMessageLogCreateManyArgs>(args?: Prisma.SelectSubset<T, DiscordMessageLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many DiscordMessageLogs and returns the data saved in the database.
+   * @param {DiscordMessageLogCreateManyAndReturnArgs} args - Arguments to create many DiscordMessageLogs.
+   * @example
+   * // Create many DiscordMessageLogs
+   * const discordMessageLog = await prisma.discordMessageLog.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many DiscordMessageLogs and only return the `id`
+   * const discordMessageLogWithIdOnly = await prisma.discordMessageLog.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends DiscordMessageLogCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, DiscordMessageLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscordMessageLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a DiscordMessageLog.
    * @param {DiscordMessageLogDeleteArgs} args - Arguments to delete one DiscordMessageLog.
    * @example
@@ -846,6 +905,36 @@ export interface DiscordMessageLogDelegate<ExtArgs extends runtime.Types.Extensi
    * 
    */
   updateMany<T extends DiscordMessageLogUpdateManyArgs>(args: Prisma.SelectSubset<T, DiscordMessageLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more DiscordMessageLogs and returns the data updated in the database.
+   * @param {DiscordMessageLogUpdateManyAndReturnArgs} args - Arguments to update many DiscordMessageLogs.
+   * @example
+   * // Update many DiscordMessageLogs
+   * const discordMessageLog = await prisma.discordMessageLog.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more DiscordMessageLogs and only return the `id`
+   * const discordMessageLogWithIdOnly = await prisma.discordMessageLog.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends DiscordMessageLogUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, DiscordMessageLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscordMessageLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one DiscordMessageLog.
@@ -1281,6 +1370,30 @@ export type DiscordMessageLogCreateManyArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many DiscordMessageLogs.
    */
   data: Prisma.DiscordMessageLogCreateManyInput | Prisma.DiscordMessageLogCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * DiscordMessageLog createManyAndReturn
+ */
+export type DiscordMessageLogCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DiscordMessageLog
+   */
+  select?: Prisma.DiscordMessageLogSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DiscordMessageLog
+   */
+  omit?: Prisma.DiscordMessageLogOmit<ExtArgs> | null
+  /**
+   * The data used to create many DiscordMessageLogs.
+   */
+  data: Prisma.DiscordMessageLogCreateManyInput | Prisma.DiscordMessageLogCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiscordMessageLogIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1325,6 +1438,36 @@ export type DiscordMessageLogUpdateManyArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many DiscordMessageLogs to update.
    */
   limit?: number
+}
+
+/**
+ * DiscordMessageLog updateManyAndReturn
+ */
+export type DiscordMessageLogUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DiscordMessageLog
+   */
+  select?: Prisma.DiscordMessageLogSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DiscordMessageLog
+   */
+  omit?: Prisma.DiscordMessageLogOmit<ExtArgs> | null
+  /**
+   * The data used to update DiscordMessageLogs.
+   */
+  data: Prisma.XOR<Prisma.DiscordMessageLogUpdateManyMutationInput, Prisma.DiscordMessageLogUncheckedUpdateManyInput>
+  /**
+   * Filter which DiscordMessageLogs to update
+   */
+  where?: Prisma.DiscordMessageLogWhereInput
+  /**
+   * Limit how many DiscordMessageLogs to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiscordMessageLogIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

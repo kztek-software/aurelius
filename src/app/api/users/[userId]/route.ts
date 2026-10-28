@@ -5,7 +5,7 @@ import { getSessionUser, hashPassword } from "@/lib/auth";
 
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  email: z.string().email().optional(),
+  email: z.string().trim().toLowerCase().email().optional(),
   password: z.string().min(6).optional(),
   title: z.string().max(100).nullable().optional(),
   avatarColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),

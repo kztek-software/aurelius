@@ -2,8 +2,8 @@
 
 # ---------------------------------------------------------------------------
 # KZTEK Work Management (flowboard) — Next.js 16 App Router
-# App KHÔNG cần container database riêng: kết nối tới SQL Server ngoài qua
-# biến môi trường DATABASE_URL (xem prisma/schema.prisma + src/lib/prisma.ts).
+# Kết nối PostgreSQL (service `db` trong docker-compose.yml hoặc server ngoài)
+# qua biến môi trường DATABASE_URL (xem prisma/schema.prisma + src/lib/prisma.ts).
 # ---------------------------------------------------------------------------
 
 ARG NODE_VERSION=20
@@ -12,10 +12,8 @@ ARG NODE_VERSION=20
 FROM node:${NODE_VERSION}-bookworm-slim AS deps
 WORKDIR /app
 
-# python3/make/g++: fallback build tool cho better-sqlite3 nếu không tải
-# được prebuilt binary phù hợp base image (Debian glibc).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ openssl \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
