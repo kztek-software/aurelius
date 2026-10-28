@@ -356,6 +356,7 @@ export type SubtaskCreateOrConnectWithoutTaskInput = {
 
 export type SubtaskCreateManyTaskInputEnvelope = {
   data: Prisma.SubtaskCreateManyTaskInput | Prisma.SubtaskCreateManyTaskInput[]
+  skipDuplicates?: boolean
 }
 
 export type SubtaskUpsertWithWhereUniqueWithoutTaskInput = {
@@ -418,7 +419,21 @@ export type SubtaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subtask"]>
 
+export type SubtaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  taskId?: boolean
+  title?: boolean
+  done?: boolean
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["subtask"]>
 
+export type SubtaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  taskId?: boolean
+  title?: boolean
+  done?: boolean
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["subtask"]>
 
 export type SubtaskSelectScalar = {
   id?: boolean
@@ -429,6 +444,12 @@ export type SubtaskSelectScalar = {
 
 export type SubtaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "title" | "done", ExtArgs["result"]["subtask"]>
 export type SubtaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+}
+export type SubtaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+}
+export type SubtaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }
 
@@ -560,6 +581,30 @@ export interface SubtaskDelegate<ExtArgs extends runtime.Types.Extensions.Intern
   createMany<T extends SubtaskCreateManyArgs>(args?: Prisma.SelectSubset<T, SubtaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Subtasks and returns the data saved in the database.
+   * @param {SubtaskCreateManyAndReturnArgs} args - Arguments to create many Subtasks.
+   * @example
+   * // Create many Subtasks
+   * const subtask = await prisma.subtask.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Subtasks and only return the `id`
+   * const subtaskWithIdOnly = await prisma.subtask.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends SubtaskCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SubtaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubtaskPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Subtask.
    * @param {SubtaskDeleteArgs} args - Arguments to delete one Subtask.
    * @example
@@ -622,6 +667,36 @@ export interface SubtaskDelegate<ExtArgs extends runtime.Types.Extensions.Intern
    * 
    */
   updateMany<T extends SubtaskUpdateManyArgs>(args: Prisma.SelectSubset<T, SubtaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Subtasks and returns the data updated in the database.
+   * @param {SubtaskUpdateManyAndReturnArgs} args - Arguments to update many Subtasks.
+   * @example
+   * // Update many Subtasks
+   * const subtask = await prisma.subtask.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Subtasks and only return the `id`
+   * const subtaskWithIdOnly = await prisma.subtask.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends SubtaskUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SubtaskUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubtaskPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Subtask.
@@ -1050,6 +1125,30 @@ export type SubtaskCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * The data used to create many Subtasks.
    */
   data: Prisma.SubtaskCreateManyInput | Prisma.SubtaskCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * Subtask createManyAndReturn
+ */
+export type SubtaskCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Subtask
+   */
+  select?: Prisma.SubtaskSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Subtask
+   */
+  omit?: Prisma.SubtaskOmit<ExtArgs> | null
+  /**
+   * The data used to create many Subtasks.
+   */
+  data: Prisma.SubtaskCreateManyInput | Prisma.SubtaskCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubtaskIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1094,6 +1193,36 @@ export type SubtaskUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many Subtasks to update.
    */
   limit?: number
+}
+
+/**
+ * Subtask updateManyAndReturn
+ */
+export type SubtaskUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Subtask
+   */
+  select?: Prisma.SubtaskSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Subtask
+   */
+  omit?: Prisma.SubtaskOmit<ExtArgs> | null
+  /**
+   * The data used to update Subtasks.
+   */
+  data: Prisma.XOR<Prisma.SubtaskUpdateManyMutationInput, Prisma.SubtaskUncheckedUpdateManyInput>
+  /**
+   * Filter which Subtasks to update
+   */
+  where?: Prisma.SubtaskWhereInput
+  /**
+   * Limit how many Subtasks to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubtaskIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

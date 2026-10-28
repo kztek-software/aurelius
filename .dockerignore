@@ -10,10 +10,7 @@ coverage
 .env
 .env*.local
 
-# Không copy DB dev local (SQLite) và data upload vào image
-prisma/dev.db
-prisma/dev.db-shm
-prisma/dev.db-wal
+# Không copy data upload vào image
 public/uploads
 
 npm-debug.log*

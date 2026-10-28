@@ -170,10 +170,10 @@ export async function getTicketsByProject(
       ...(whereClause.AND || []),
       {
         OR: [
-          { title: { contains: term } },
-          { trackingCode: { contains: term } },
-          { customerName: { contains: term } },
-          { customerEmail: { contains: term } },
+          { title: { contains: term, mode: "insensitive" } },
+          { trackingCode: { contains: term, mode: "insensitive" } },
+          { customerName: { contains: term, mode: "insensitive" } },
+          { customerEmail: { contains: term, mode: "insensitive" } },
         ]
       }
     ];

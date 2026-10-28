@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   FileText,
   X,
@@ -9,37 +9,30 @@ import {
   Trash2,
 } from "lucide-react";
 import { WysiwygEditor } from "@/components/ui/wysiwyg-editor";
+import { useLocalStorageRaw, writeLocalStorage } from "@/lib/client-store";
+
+const SCRATCHPAD_KEY = "kztek_desktop_scratchpad";
 
 interface DesktopScratchpadProps {
   onClose: () => void;
 }
 
 export function DesktopScratchpad({ onClose }: DesktopScratchpadProps) {
-  const [content, setContent] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const [lastSaved, setLastSaved] = useState<string>("");
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("kztek_desktop_scratchpad");
-      if (saved) {
-        setContent(saved);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
+  // Nội dung đã lưu được đọc qua external store nên không cần hydrate bằng
+  // setState trong useEffect. `draft` giữ nội dung đang gõ của phiên hiện tại và
+  // được ưu tiên, nhờ đó vẫn gõ được khi localStorage bị chặn.
+  const stored = useLocalStorageRaw(SCRATCHPAD_KEY);
+  const [draft, setDraft] = useState<string | null>(null);
+  const content = draft ?? stored ?? "";
 
   // Auto-save to localStorage
   const handleChange = (val: string) => {
-    setContent(val);
-    try {
-      localStorage.setItem("kztek_desktop_scratchpad", val);
-      setLastSaved(new Date().toLocaleTimeString("vi-VN"));
-    } catch (e) {
-      console.error(e);
-    }
+    setDraft(val);
+    writeLocalStorage(SCRATCHPAD_KEY, val);
+    setLastSaved(new Date().toLocaleTimeString("vi-VN"));
   };
 
   const handleCopy = async () => {

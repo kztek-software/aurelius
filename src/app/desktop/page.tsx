@@ -110,6 +110,7 @@ export default function DesktopWorkstationPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount: setState chỉ chạy sau await, rule không phân tích được biên async
     fetchData();
   }, []);
 

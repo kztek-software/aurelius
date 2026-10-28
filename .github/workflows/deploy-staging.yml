@@ -10,9 +10,13 @@ concurrency:
   group: deploy-staging
   cancel-in-progress: true
 
+env:
+  # Phải là chữ thường — Docker repository name không cho phép chữ hoa.
+  IMAGE_NAME: kztek/kztek-workmanagement
+
 jobs:
-  build-and-trigger:
-    name: Build, lint & trigger deploy webhook
+  build-and-deploy:
+    name: Lint, build & push image, trigger deploy
     runs-on: ubuntu-latest
     environment: staging
 
@@ -32,9 +36,42 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Build (sanity check)
-        run: npm run build
+      # `npm run build` không chạy riêng ở đây nữa: Dockerfile stage `builder`
+      # đã chạy đúng lệnh đó, nên build lỗi vẫn làm job fail mà không mất thời
+      # gian build hai lần.
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Cache layer giữa các lần chạy để không phải npm ci + next build lại từ đầu
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Chỉ gọi webhook SAU KHI image đã nằm trên registry, để server deploy
+      # luôn pull được `:latest` vừa build.
       - name: Trigger deploying webhook
         run: |
           curl -sSf -X POST \

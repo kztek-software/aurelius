@@ -92,10 +92,12 @@ export function ProjectAttachmentGallery({
     }
   }, [projectId]);
 
+  // Không mirror `propAttachments` vào state: biến `attachments` bên dưới đã
+  // ưu tiên prop khi có, nên setState ở đây chỉ tạo thêm một lượt render.
+  // Chỉ fetch khi component tự quản lý danh sách (không được truyền prop).
   useEffect(() => {
-    if (propAttachments !== undefined) {
-      setInternalAttachments(propAttachments);
-    } else if (projectId) {
+    if (propAttachments === undefined && projectId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount: setState chỉ chạy sau await, rule không phân tích được async
       fetchInternalAttachments();
     }
   }, [propAttachments, projectId, fetchInternalAttachments]);

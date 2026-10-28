@@ -51,13 +51,23 @@ export function CommandPalette({
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input when opened
-  useEffect(() => {
+  // Reset ô tìm kiếm mỗi lần bảng lệnh được mở.
+  // Điều chỉnh trong lúc render để lần render đầu đã sạch, không nhấp nháy
+  // kết quả của lượt mở trước.
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setQuery("");
       setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
+  }
+
+  // Focus input là tác vụ trên DOM ngoài React -> giữ trong effect.
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(timer);
   }, [isOpen]);
 
   // Core Quick Actions

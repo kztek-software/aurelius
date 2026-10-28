@@ -114,7 +114,7 @@ export default function BoardPage() {
 
   // Dialogs State
   const [activeTask, setActiveTask] = useState<TaskDto | null>(null);
-  const [openTaskId, setOpenTaskId] = useState<string | null>(null);
+  const [openTaskId, setOpenTaskId] = useState<string | null>(urlTaskId);
   const [newTaskOpen, setNewTaskOpen] = useState(false);
   const [newTaskStatus, setNewTaskStatus] = useState("TODO");
   const [notionOpen, setNotionOpen] = useState(false);
@@ -188,17 +188,20 @@ export default function BoardPage() {
     return () => el.removeEventListener("wheel", handleWheel);
   }, []);
 
-  useEffect(() => {
-    if (urlTaskId) {
-      setOpenTaskId(urlTaskId);
-    }
-  }, [urlTaskId]);
+  // Đồng bộ state theo query param của URL. Điều chỉnh ngay trong lúc render
+  // (thay vì useEffect) để dialog/filter đúng ngay từ lượt render đầu tiên sau
+  // khi URL thay đổi, không render thừa với giá trị cũ.
+  const [prevUrlTaskId, setPrevUrlTaskId] = useState(urlTaskId);
+  if (urlTaskId !== prevUrlTaskId) {
+    setPrevUrlTaskId(urlTaskId);
+    if (urlTaskId) setOpenTaskId(urlTaskId);
+  }
 
-  useEffect(() => {
-    if (urlSprintId) {
-      setSprintFilter(urlSprintId);
-    }
-  }, [urlSprintId]);
+  const [prevUrlSprintId, setPrevUrlSprintId] = useState(urlSprintId);
+  if (urlSprintId !== prevUrlSprintId) {
+    setPrevUrlSprintId(urlSprintId);
+    if (urlSprintId) setSprintFilter(urlSprintId);
+  }
 
   const tasksApiUrl = projectId ? `/api/projects/${projectId}/tasks` : null;
 

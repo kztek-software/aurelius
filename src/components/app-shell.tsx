@@ -61,6 +61,7 @@ import type { UserLite } from "@/lib/types";
 import { usePermissions } from "@/lib/permissions-context";
 import { useTheme } from "@/lib/theme-context";
 import { prefetchTab } from "@/lib/tab-cache";
+import { useLocalStorageRaw, writeLocalStorage } from "@/lib/client-store";
 
 type ProjectInfo = {
   id: string;
@@ -155,30 +156,32 @@ export function AppShell({
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
 
-  // Pinned Sidebar Nav Items (ghim mục điều hướng lên đầu sidebar) — lưu theo từng user trên trình duyệt
-  const [pinnedHrefs, setPinnedHrefs] = useState<string[]>([]);
+  // Pinned Sidebar Nav Items (ghim mục điều hướng lên đầu sidebar) — lưu theo từng user trên trình duyệt.
+  // localStorage là external store: đọc trực tiếp qua useSyncExternalStore thay vì
+  // hydrate bằng setState trong useEffect (tránh render thừa sau mount).
   const pinnedStorageKey = `kztek_pinned_nav_items_${user.id}`;
-
-  useEffect(() => {
+  const pinnedRaw = useLocalStorageRaw(pinnedStorageKey);
+  const persistedPinned = useMemo<string[]>(() => {
+    if (!pinnedRaw) return [];
     try {
-      const raw = localStorage.getItem(pinnedStorageKey);
-      if (raw) setPinnedHrefs(JSON.parse(raw));
+      const parsed = JSON.parse(pinnedRaw);
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
-      // localStorage không khả dụng (SSR/private mode) -> bỏ qua, dùng mặc định rỗng
+      return [];
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pinnedStorageKey]);
+  }, [pinnedRaw]);
+
+  // `pinnedOverride` giữ thay đổi của phiên hiện tại và được ưu tiên hơn
+  // localStorage, nhờ đó ghim vẫn hoạt động khi localStorage bị chặn.
+  const [pinnedOverride, setPinnedOverride] = useState<string[] | null>(null);
+  const pinnedHrefs = pinnedOverride ?? persistedPinned;
 
   function togglePinnedNav(href: string) {
-    setPinnedHrefs((prev) => {
-      const next = prev.includes(href) ? prev.filter((h) => h !== href) : [...prev, href];
-      try {
-        localStorage.setItem(pinnedStorageKey, JSON.stringify(next));
-      } catch {
-        // bỏ qua nếu không ghi được localStorage
-      }
-      return next;
-    });
+    const next = pinnedHrefs.includes(href)
+      ? pinnedHrefs.filter((h) => h !== href)
+      : [...pinnedHrefs, href];
+    setPinnedOverride(next);
+    writeLocalStorage(pinnedStorageKey, JSON.stringify(next));
   }
 
   // Global Keyboard Shortcuts Listener for AppShell
@@ -220,10 +223,14 @@ export function AppShell({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Close mobile drawer when route changes
-  useEffect(() => {
+  // Close mobile drawer when route changes.
+  // Điều chỉnh trong lúc render thay vì useEffect: drawer đóng ngay ở lượt render
+  // đầu của route mới, không nhấp nháy thêm một lượt.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setMobileDrawerOpen(false);
-  }, [pathname]);
+  }
 
   // Xử lý kết quả redirect về từ Discord OAuth callback (?discord_oauth=connected|error)
   useEffect(() => {
@@ -234,6 +241,7 @@ export function AppShell({
     if (discordOauthStatus === "error") {
       alert(searchParams.get("discord_oauth_message") || "Kết nối Discord thất bại");
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mở modal một lần theo kết quả redirect OAuth trên URL; URL bị xoá ngay sau đó nên không thể derive trong render
     setIsDiscordLinkOpen(true);
     window.history.replaceState({}, "", window.location.pathname);
   }, []);
@@ -257,6 +265,7 @@ export function AppShell({
   // Load teams and users when create modal is opened
   useEffect(() => {
     if (createProjectOpen && availableTeams.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-open: cờ loading phải bật ngay khi modal mở, dữ liệu về trong .then()
       setLoadingModalData(true);
       Promise.all([
         fetch("/api/teams").then((r) => r.json()),

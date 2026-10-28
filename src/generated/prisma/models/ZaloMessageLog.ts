@@ -572,6 +572,7 @@ export type ZaloMessageLogCreateOrConnectWithoutUserInput = {
 
 export type ZaloMessageLogCreateManyUserInputEnvelope = {
   data: Prisma.ZaloMessageLogCreateManyUserInput | Prisma.ZaloMessageLogCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type ZaloMessageLogUpsertWithWhereUniqueWithoutUserInput = {
@@ -688,7 +689,39 @@ export type ZaloMessageLogSelect<ExtArgs extends runtime.Types.Extensions.Intern
   user?: boolean | Prisma.ZaloMessageLog$userArgs<ExtArgs>
 }, ExtArgs["result"]["zaloMessageLog"]>
 
+export type ZaloMessageLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  zaloUserId?: boolean
+  phone?: boolean
+  channel?: boolean
+  notificationType?: boolean
+  templateId?: boolean
+  content?: boolean
+  status?: boolean
+  providerMsgId?: boolean
+  errorMessage?: boolean
+  createdAt?: boolean
+  sentAt?: boolean
+  user?: boolean | Prisma.ZaloMessageLog$userArgs<ExtArgs>
+}, ExtArgs["result"]["zaloMessageLog"]>
 
+export type ZaloMessageLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  userId?: boolean
+  zaloUserId?: boolean
+  phone?: boolean
+  channel?: boolean
+  notificationType?: boolean
+  templateId?: boolean
+  content?: boolean
+  status?: boolean
+  providerMsgId?: boolean
+  errorMessage?: boolean
+  createdAt?: boolean
+  sentAt?: boolean
+  user?: boolean | Prisma.ZaloMessageLog$userArgs<ExtArgs>
+}, ExtArgs["result"]["zaloMessageLog"]>
 
 export type ZaloMessageLogSelectScalar = {
   id?: boolean
@@ -708,6 +741,12 @@ export type ZaloMessageLogSelectScalar = {
 
 export type ZaloMessageLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "zaloUserId" | "phone" | "channel" | "notificationType" | "templateId" | "content" | "status" | "providerMsgId" | "errorMessage" | "createdAt" | "sentAt", ExtArgs["result"]["zaloMessageLog"]>
 export type ZaloMessageLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.ZaloMessageLog$userArgs<ExtArgs>
+}
+export type ZaloMessageLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.ZaloMessageLog$userArgs<ExtArgs>
+}
+export type ZaloMessageLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ZaloMessageLog$userArgs<ExtArgs>
 }
 
@@ -848,6 +887,30 @@ export interface ZaloMessageLogDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends ZaloMessageLogCreateManyArgs>(args?: Prisma.SelectSubset<T, ZaloMessageLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ZaloMessageLogs and returns the data saved in the database.
+   * @param {ZaloMessageLogCreateManyAndReturnArgs} args - Arguments to create many ZaloMessageLogs.
+   * @example
+   * // Create many ZaloMessageLogs
+   * const zaloMessageLog = await prisma.zaloMessageLog.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ZaloMessageLogs and only return the `id`
+   * const zaloMessageLogWithIdOnly = await prisma.zaloMessageLog.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ZaloMessageLogCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ZaloMessageLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ZaloMessageLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ZaloMessageLog.
    * @param {ZaloMessageLogDeleteArgs} args - Arguments to delete one ZaloMessageLog.
    * @example
@@ -910,6 +973,36 @@ export interface ZaloMessageLogDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends ZaloMessageLogUpdateManyArgs>(args: Prisma.SelectSubset<T, ZaloMessageLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ZaloMessageLogs and returns the data updated in the database.
+   * @param {ZaloMessageLogUpdateManyAndReturnArgs} args - Arguments to update many ZaloMessageLogs.
+   * @example
+   * // Update many ZaloMessageLogs
+   * const zaloMessageLog = await prisma.zaloMessageLog.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ZaloMessageLogs and only return the `id`
+   * const zaloMessageLogWithIdOnly = await prisma.zaloMessageLog.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ZaloMessageLogUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ZaloMessageLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ZaloMessageLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ZaloMessageLog.
@@ -1347,6 +1440,30 @@ export type ZaloMessageLogCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many ZaloMessageLogs.
    */
   data: Prisma.ZaloMessageLogCreateManyInput | Prisma.ZaloMessageLogCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * ZaloMessageLog createManyAndReturn
+ */
+export type ZaloMessageLogCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ZaloMessageLog
+   */
+  select?: Prisma.ZaloMessageLogSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ZaloMessageLog
+   */
+  omit?: Prisma.ZaloMessageLogOmit<ExtArgs> | null
+  /**
+   * The data used to create many ZaloMessageLogs.
+   */
+  data: Prisma.ZaloMessageLogCreateManyInput | Prisma.ZaloMessageLogCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZaloMessageLogIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1391,6 +1508,36 @@ export type ZaloMessageLogUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many ZaloMessageLogs to update.
    */
   limit?: number
+}
+
+/**
+ * ZaloMessageLog updateManyAndReturn
+ */
+export type ZaloMessageLogUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ZaloMessageLog
+   */
+  select?: Prisma.ZaloMessageLogSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ZaloMessageLog
+   */
+  omit?: Prisma.ZaloMessageLogOmit<ExtArgs> | null
+  /**
+   * The data used to update ZaloMessageLogs.
+   */
+  data: Prisma.XOR<Prisma.ZaloMessageLogUpdateManyMutationInput, Prisma.ZaloMessageLogUncheckedUpdateManyInput>
+  /**
+   * Filter which ZaloMessageLogs to update
+   */
+  where?: Prisma.ZaloMessageLogWhereInput
+  /**
+   * Limit how many ZaloMessageLogs to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZaloMessageLogIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -14,8 +14,9 @@ export default async function ProjectLayout({
   const { projectId } = await params;
   const user = await getSessionUser();
   if (!user) redirect("/login");
+  if (user.mustChangePassword) redirect("/change-password");
 
-  let [project, projects] = await Promise.all([
+  const [initialProject, projects] = await Promise.all([
     prisma.project.findFirst({
       where: user.role === "ADMIN"
         ? { OR: [{ id: projectId }, { key: projectId }] }
@@ -42,6 +43,8 @@ export default async function ProjectLayout({
       orderBy: { createdAt: "asc" },
     }),
   ]);
+
+  let project = initialProject;
 
   if (!project) {
     project = await prisma.project.findFirst({

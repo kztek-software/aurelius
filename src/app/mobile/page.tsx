@@ -78,6 +78,12 @@ export default function MobileSimulatorPage() {
         return;
       }
 
+      if (data.user?.mustChangePassword) {
+        document.cookie = `flowboard_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+        window.location.href = "/change-password";
+        return;
+      }
+
       setToken(data.token);
       setCurrentUser(data.user);
       await loadInitialData(data.token);
@@ -101,7 +107,7 @@ export default function MobileSimulatorPage() {
       const projList = projData.projects || [];
       setProjects(projList);
 
-      let selectedProj = projList[0] || null;
+      const selectedProj = projList[0] || null;
       setCurrentProject(selectedProj);
 
       // 2. Tasks

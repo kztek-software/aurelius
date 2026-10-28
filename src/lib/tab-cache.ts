@@ -197,13 +197,35 @@ export function useTabCache<T>(
   const [isValidating, setIsValidating] = useState<boolean>(false);
   const [error, setError] = useState<unknown | null>(null);
 
-  // Ref lưu fetcher & callbacks để tránh dependency loop trong useEffect
+  // Ref lưu fetcher & callbacks để tránh dependency loop trong useEffect.
+  // Gán trong effect (không phải trong lúc render): effect này khai báo TRƯỚC
+  // các effect khác nên luôn cập nhật ref xong trước khi chúng chạy.
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
   const onSuccessRef = useRef(onSuccess);
-  onSuccessRef.current = onSuccess;
   const onErrorRef = useRef(onError);
-  onErrorRef.current = onError;
+
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  });
+
+  // Đồng bộ state khi `key` thay đổi. Giá trị lúc mount đã được lấy từ cache
+  // trong useState initializer, nên ở đây chỉ xử lý các lần key đổi về sau —
+  // làm ngay trong lúc render để không render thừa với dữ liệu của key cũ.
+  const [prevKey, setPrevKey] = useState(key);
+  if (key !== prevKey) {
+    setPrevKey(key);
+    const nextCached = key ? getTabCache<T>(key) : undefined;
+    if (nextCached !== undefined) {
+      setData(nextCached);
+      setLoading(false);
+    } else {
+      setData(initialData);
+      setLoading(Boolean(enabled && key));
+    }
+    setError(null);
+  }
 
   // Đăng ký listener lắng nghe thay đổi của key này từ các component khác
   useEffect(() => {
@@ -220,13 +242,6 @@ export function useTabCache<T>(
     };
 
     keyListeners.add(handleUpdate);
-
-    // Đồng bộ ngay nếu cache có dữ liệu mới hơn state hiện tại
-    const currentCached = getTabCache<T>(key);
-    if (currentCached !== undefined && currentCached !== data) {
-      setData(currentCached);
-      setLoading(false);
-    }
 
     return () => {
       keyListeners.delete(handleUpdate);
@@ -278,23 +293,18 @@ export function useTabCache<T>(
     return await promise;
   }, [key, enabled]);
 
-  // Kích hoạt revalidate khi mount hoặc khi key thay đổi
+  // Kích hoạt revalidate khi mount hoặc khi key thay đổi.
+  // `data`/`loading` đã được đặt đúng ở useState initializer (mount) và ở khối
+  // đồng bộ key phía trên, nên effect này chỉ còn việc gọi fetch.
   useEffect(() => {
     if (!key || !enabled) return;
 
-    const currentCached = getTabCache<T>(key);
-    if (currentCached !== undefined) {
-      setData(currentCached);
-      setLoading(false);
-
-      // Nếu dữ liệu trong cache đã cũ hơn staleTime -> revalidate ngầm
-      if (isTabCacheStale(key, staleTime)) {
-        revalidate();
-      }
-    } else {
-      setLoading(true);
-      revalidate();
+    // Có cache -> chỉ revalidate ngầm khi dữ liệu đã cũ hơn staleTime.
+    if (getTabCache<T>(key) !== undefined && !isTabCacheStale(key, staleTime)) {
+      return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount: revalidate() chỉ setState sau await, rule không phân tích được async
+    revalidate();
   }, [key, enabled, staleTime, revalidate]);
 
   // Hàm mutate cục bộ

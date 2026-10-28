@@ -83,6 +83,7 @@ export function EmailLogModal({
 
   useEffect(() => {
     if (visible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-open: setState chỉ chạy sau await, rule không phân tích được biên async
       fetchLogs();
       if (currentUserEmail) setTestEmail(currentUserEmail);
     }

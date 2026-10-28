@@ -1,38 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Shield, ArrowRight, AlertCircle, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUrlParam } from "@/lib/client-store";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Tự động nhận diện lỗi từ URL (khi gửi form HTML truyền thống thất bại)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const errParam = params.get("error");
-      if (errParam === "invalid_credentials") {
-        setError("Tài khoản hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.");
-      } else if (errParam === "missing_fields") {
-        setError("Vui lòng nhập đầy đủ tài khoản và mật khẩu.");
-      } else if (errParam) {
-        setError("Đăng nhập không thành công. Vui lòng thử lại.");
-      }
-    }
-  }, []);
+  // Lỗi từ URL (khi gửi form HTML truyền thống thất bại) được đọc như external
+  // store thay vì setState trong useEffect.
+  const errParam = useUrlParam("error");
+  const urlError =
+    errParam === "invalid_credentials"
+      ? "Tài khoản hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại."
+      : errParam === "missing_fields"
+        ? "Vui lòng nhập đầy đủ tài khoản và mật khẩu."
+        : errParam
+          ? "Đăng nhập không thành công. Vui lòng thử lại."
+          : "";
+
+  // Lỗi do submit bằng fetch được ưu tiên hiển thị so với lỗi còn lại trên URL.
+  // `urlErrorDismissed` cho phép đóng banner lỗi đọc từ URL (URL không đổi được
+  // ở đây nên cần cờ riêng).
+  const [urlErrorDismissed, setUrlErrorDismissed] = useState(false);
+  const error = formError || (urlErrorDismissed ? "" : urlError);
+
+  function clearError() {
+    setFormError("");
+    setUrlErrorDismissed(true);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    clearError();
     setLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
@@ -43,16 +52,16 @@ export default function LoginPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Tài khoản hoặc mật khẩu không chính xác.");
+        setFormError(data.error ?? "Tài khoản hoặc mật khẩu không chính xác.");
         return;
       }
       if (data.token) {
         document.cookie = `flowboard_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
         try { localStorage.setItem("flowboard_session", data.token); } catch {}
       }
-      window.location.href = "/";
+      window.location.href = data.user?.mustChangePassword ? "/change-password" : "/";
     } catch {
-      setError("Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng.");
+      setFormError("Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng.");
     } finally {
       setLoading(false);
     }
@@ -61,7 +70,7 @@ export default function LoginPage() {
   async function quickLogin(account: string, pass: string) {
     setEmail(account);
     setPassword(pass);
-    setError("");
+    clearError();
     setLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
@@ -76,12 +85,12 @@ export default function LoginPage() {
           document.cookie = `flowboard_session=${d.token}; path=/; max-age=604800; SameSite=Lax`;
           try { localStorage.setItem("flowboard_session", d.token); } catch {}
         }
-        window.location.href = "/";
+        window.location.href = d.user?.mustChangePassword ? "/change-password" : "/";
       } else {
-        setError(d.error ?? "Không thể đăng nhập vào tài khoản này.");
+        setFormError(d.error ?? "Không thể đăng nhập vào tài khoản này.");
       }
     } catch {
-      setError("Lỗi kết nối máy chủ");
+      setFormError("Lỗi kết nối máy chủ");
     } finally {
       setLoading(false);
     }
@@ -119,7 +128,7 @@ export default function LoginPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setError("")}
+                onClick={clearError}
                 className="text-accent hover:text-foreground transition-colors p-0.5 rounded cursor-pointer"
                 title="Đóng thông báo"
               >

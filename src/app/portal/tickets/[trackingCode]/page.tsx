@@ -84,6 +84,7 @@ export default function TicketTrackingPage({
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount: setState chỉ chạy sau await, rule không phân tích được biên async
     loadTicket();
   }, [trackingCode]);
 

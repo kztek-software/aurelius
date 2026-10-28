@@ -220,6 +220,7 @@ export default function UsersManagementPage() {
   const [editPhone, setEditPhone] = useState("");
   const [editDiscordUserId, setEditDiscordUserId] = useState("");
   const [updatingUser, setUpdatingUser] = useState(false);
+  const [sendingCredentialsId, setSendingCredentialsId] = useState<string | null>(null);
 
   // ==========================================
   // ROLES & PERMISSIONS STATE
@@ -315,10 +316,15 @@ export default function UsersManagementPage() {
     loadAllData();
   }, []);
 
-  useEffect(() => {
-    const r = roles.find((r) => r.key === selectedRoleKey);
+  // Nạp lại danh sách quyền khi đổi vai trò đang chọn (hoặc khi `roles` vừa
+  // được tải). `activePermissions` vẫn là state vì người dùng tick/untick được,
+  // nên dùng pattern điều chỉnh state trong lúc render thay vì useEffect.
+  const [prevRoleSync, setPrevRoleSync] = useState({ key: selectedRoleKey, roles });
+  if (prevRoleSync.key !== selectedRoleKey || prevRoleSync.roles !== roles) {
+    setPrevRoleSync({ key: selectedRoleKey, roles });
+    const r = roles.find((role) => role.key === selectedRoleKey);
     if (r) setActivePermissions(r.permissions);
-  }, [selectedRoleKey, roles]);
+  }
 
   // ==========================================
   // TEAM HANDLERS
@@ -552,6 +558,40 @@ export default function UsersManagementPage() {
       loadAllData();
     } finally {
       setUpdatingUser(false);
+    }
+  }
+
+  async function handleSendCredentials(u: UserItem) {
+    if (
+      !confirm(
+        `Gửi email tài khoản + mật khẩu mới đến ${u.email}?\nMật khẩu hiện tại của "${u.name}" sẽ bị thay thế và người dùng phải đổi mật khẩu ở lần đăng nhập đầu tiên.`
+      )
+    )
+      return;
+
+    setSendingCredentialsId(u.id);
+    try {
+      const res = await fetch(`/api/users/${u.id}/send-credentials`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.current?.show({ severity: "error", summary: "Lỗi", detail: data.error ?? "Không gửi được email" });
+        return;
+      }
+      if (data.status === "SIMULATED") {
+        // Chưa cấu hình SMTP: email chỉ nằm trong Outbox giả lập -> hiển thị mật khẩu để Admin tự bàn giao
+        toast.current?.show({
+          severity: "warn",
+          summary: "Chưa cấu hình SMTP",
+          detail: `Email chưa thực sự được gửi. Mật khẩu tạm của ${u.name}: ${data.password}`,
+          sticky: true,
+        });
+      } else {
+        toast.current?.show({ severity: "success", summary: "Thành công", detail: `Đã gửi thông tin tài khoản đến ${u.email}` });
+      }
+    } catch {
+      toast.current?.show({ severity: "error", summary: "Lỗi", detail: "Lỗi kết nối máy chủ" });
+    } finally {
+      setSendingCredentialsId(null);
     }
   }
 
@@ -935,6 +975,17 @@ export default function UsersManagementPage() {
 
       {rowData.id !== currentUserId && (
         <button
+          onClick={() => handleSendCredentials(rowData)}
+          disabled={sendingCredentialsId === rowData.id}
+          className="p-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent-subtle transition-colors cursor-pointer disabled:opacity-50"
+          title="Gửi email tài khoản + mật khẩu khởi tạo"
+        >
+          {sendingCredentialsId === rowData.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        </button>
+      )}
+
+      {rowData.id !== currentUserId && (
+        <button
           onClick={() => handleDeleteUser(rowData)}
           className="p-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent-subtle transition-colors cursor-pointer"
           title="Xóa tài khoản"
@@ -1005,7 +1056,10 @@ export default function UsersManagementPage() {
           {activeTab === "users" && (
             <Button
               size="sm"
-              onClick={() => setCreateUserOpen(true)}
+              onClick={() => {
+                setEditingUser(null);
+                setCreateUserOpen(true);
+              }}
               className="h-9 px-3.5 text-xs font-bold bg-accent hover:bg-accent/90 text-white shadow-md shadow-accent/25 shrink-0"
             >
               <UserPlus className="h-3.5 w-3.5 mr-1.5" /> Thêm nhân sự mới
@@ -1021,6 +1075,7 @@ export default function UsersManagementPage() {
                 setTeamDesc("");
                 setTeamLeaderId(null);
                 setTeamMemberIds([]);
+                setEditingTeam(null);
                 setCreateTeamOpen(true);
               }}
               className="h-9 px-3.5 text-xs font-bold bg-accent hover:bg-accent/90 text-white shadow-md shadow-accent/25 shrink-0"
@@ -1635,6 +1690,7 @@ export default function UsersManagementPage() {
         onHide={() => {
           setCreateTeamOpen(false);
           setEditTeamOpen(false);
+          setEditingTeam(null);
         }}
         className="w-full max-w-lg border border-line bg-surface rounded-2xl shadow-2xl"
       >
@@ -1755,6 +1811,7 @@ export default function UsersManagementPage() {
               onClick={() => {
                 setCreateTeamOpen(false);
                 setEditTeamOpen(false);
+                setEditingTeam(null);
               }}
             >
               Hủy
@@ -1776,6 +1833,7 @@ export default function UsersManagementPage() {
         onHide={() => {
           setCreateUserOpen(false);
           setEditUserOpen(false);
+          setEditingUser(null);
         }}
         className="w-full max-w-md border border-line bg-surface rounded-2xl shadow-2xl"
       >
@@ -1928,6 +1986,7 @@ export default function UsersManagementPage() {
               onClick={() => {
                 setCreateUserOpen(false);
                 setEditUserOpen(false);
+                setEditingUser(null);
               }}
             >
               Hủy

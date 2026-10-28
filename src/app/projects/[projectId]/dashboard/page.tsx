@@ -51,6 +51,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import type { ProjectDashboardData } from "@/lib/types";
 import { useTabCache } from "@/lib/tab-cache";
 import { ProjectAttachmentGallery } from "@/components/project/project-attachment-gallery";
+import { useIsClient } from "@/lib/client-store";
 
 const tooltipStyle = {
   backgroundColor: "#181E2E",
@@ -77,11 +78,8 @@ export default function ProjectDashboardPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [leftTab, setLeftTab] = useState<"MEMBERS" | "TEAMS" | "DOCS">("MEMBERS");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // `false` khi SSR/hydrate, `true` sau đó — tránh setState trong useEffect.
+  const mounted = useIsClient();
 
   // Project Settings & Delete State
   const [settingsOpen, setSettingsOpen] = useState(false);

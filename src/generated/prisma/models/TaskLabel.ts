@@ -359,6 +359,7 @@ export type TaskLabelCreateOrConnectWithoutTaskInput = {
 
 export type TaskLabelCreateManyTaskInputEnvelope = {
   data: Prisma.TaskLabelCreateManyTaskInput | Prisma.TaskLabelCreateManyTaskInput[]
+  skipDuplicates?: boolean
 }
 
 export type TaskLabelUpsertWithWhereUniqueWithoutTaskInput = {
@@ -400,6 +401,7 @@ export type TaskLabelCreateOrConnectWithoutLabelInput = {
 
 export type TaskLabelCreateManyLabelInputEnvelope = {
   data: Prisma.TaskLabelCreateManyLabelInput | Prisma.TaskLabelCreateManyLabelInput[]
+  skipDuplicates?: boolean
 }
 
 export type TaskLabelUpsertWithWhereUniqueWithoutLabelInput = {
@@ -459,7 +461,19 @@ export type TaskLabelSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   label?: boolean | Prisma.LabelDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["taskLabel"]>
 
+export type TaskLabelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  taskId?: boolean
+  labelId?: boolean
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  label?: boolean | Prisma.LabelDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["taskLabel"]>
 
+export type TaskLabelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  taskId?: boolean
+  labelId?: boolean
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  label?: boolean | Prisma.LabelDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["taskLabel"]>
 
 export type TaskLabelSelectScalar = {
   taskId?: boolean
@@ -468,6 +482,14 @@ export type TaskLabelSelectScalar = {
 
 export type TaskLabelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "labelId", ExtArgs["result"]["taskLabel"]>
 export type TaskLabelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  label?: boolean | Prisma.LabelDefaultArgs<ExtArgs>
+}
+export type TaskLabelIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  label?: boolean | Prisma.LabelDefaultArgs<ExtArgs>
+}
+export type TaskLabelIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
   label?: boolean | Prisma.LabelDefaultArgs<ExtArgs>
 }
@@ -599,6 +621,30 @@ export interface TaskLabelDelegate<ExtArgs extends runtime.Types.Extensions.Inte
   createMany<T extends TaskLabelCreateManyArgs>(args?: Prisma.SelectSubset<T, TaskLabelCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many TaskLabels and returns the data saved in the database.
+   * @param {TaskLabelCreateManyAndReturnArgs} args - Arguments to create many TaskLabels.
+   * @example
+   * // Create many TaskLabels
+   * const taskLabel = await prisma.taskLabel.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many TaskLabels and only return the `taskId`
+   * const taskLabelWithTaskIdOnly = await prisma.taskLabel.createManyAndReturn({
+   *   select: { taskId: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends TaskLabelCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, TaskLabelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskLabelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a TaskLabel.
    * @param {TaskLabelDeleteArgs} args - Arguments to delete one TaskLabel.
    * @example
@@ -661,6 +707,36 @@ export interface TaskLabelDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * 
    */
   updateMany<T extends TaskLabelUpdateManyArgs>(args: Prisma.SelectSubset<T, TaskLabelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more TaskLabels and returns the data updated in the database.
+   * @param {TaskLabelUpdateManyAndReturnArgs} args - Arguments to update many TaskLabels.
+   * @example
+   * // Update many TaskLabels
+   * const taskLabel = await prisma.taskLabel.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more TaskLabels and only return the `taskId`
+   * const taskLabelWithTaskIdOnly = await prisma.taskLabel.updateManyAndReturn({
+   *   select: { taskId: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends TaskLabelUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, TaskLabelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskLabelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one TaskLabel.
@@ -1088,6 +1164,30 @@ export type TaskLabelCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many TaskLabels.
    */
   data: Prisma.TaskLabelCreateManyInput | Prisma.TaskLabelCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * TaskLabel createManyAndReturn
+ */
+export type TaskLabelCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskLabel
+   */
+  select?: Prisma.TaskLabelSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskLabel
+   */
+  omit?: Prisma.TaskLabelOmit<ExtArgs> | null
+  /**
+   * The data used to create many TaskLabels.
+   */
+  data: Prisma.TaskLabelCreateManyInput | Prisma.TaskLabelCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskLabelIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1132,6 +1232,36 @@ export type TaskLabelUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many TaskLabels to update.
    */
   limit?: number
+}
+
+/**
+ * TaskLabel updateManyAndReturn
+ */
+export type TaskLabelUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskLabel
+   */
+  select?: Prisma.TaskLabelSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskLabel
+   */
+  omit?: Prisma.TaskLabelOmit<ExtArgs> | null
+  /**
+   * The data used to update TaskLabels.
+   */
+  data: Prisma.XOR<Prisma.TaskLabelUpdateManyMutationInput, Prisma.TaskLabelUncheckedUpdateManyInput>
+  /**
+   * Filter which TaskLabels to update
+   */
+  where?: Prisma.TaskLabelWhereInput
+  /**
+   * Limit how many TaskLabels to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskLabelIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

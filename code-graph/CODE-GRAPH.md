@@ -9,7 +9,7 @@
 ## Tổng quan dự án
 
 Hệ thống quản lý công việc và dự án toàn diện **KZTEK Work Management**:
-- **Backend & Web App**: Next.js 16 (App Router), React 19, TailwindCSS, Prisma ORM 7, **Microsoft SQL Server (`14.160.26.45:9999`, DB `WorkingManager`)** via `@prisma/adapter-mssql`.
+- **Backend & Web App**: Next.js 16 (App Router), React 19, TailwindCSS, Prisma ORM 7, **PostgreSQL 17 (DB `WorkingManager`, collation ICU `vi-VN`)** via `@prisma/adapter-pg`.
 - **Desktop Web Workstation (Phase 4)**: Không gian làm việc máy tính chuyên dụng (`/desktop`), Dual-Pane Split View, Global Command Palette (`Ctrl+K`), Shortcuts Hub, Smart Work Calculator (Story Points, Sprint Capacity, KPI, Office Calc), Desktop Scratchpad, Desktop PWA Standalone Mode (`manifest.json`).
 - **Mobile Client (Phase 3)**: C# .NET 8 / Avalonia UI XAML (Cross-platform Android, iOS, Windows, macOS, Linux).
 - **Agent Orchestration**: Gemini Agent Framework (`.gemini/`, GEMINI.md, RULES.md, WORKFLOW.md).
@@ -30,8 +30,8 @@ kztek-work-management/
 │   │   ├── desktop/             ← Desktop Components (SplitView, StatusBar, CommandPalette, Shortcuts, SmartCalc, Scratchpad)
 │   │   ├── app-shell.tsx        ← Root Application Shell & Global Keybindings
 │   │   └── board/               ← Kanban Board Components
-│   ├── lib/                     ← Utilities, Auth, DB Client (PrismaMssql), Permissions & Domain Services
-│   └── generated/prisma/        ← Prisma Client Generated for SQL Server
+│   ├── lib/                     ← Utilities, Auth, DB Client (PrismaPg), Permissions & Domain Services
+│   └── generated/prisma/        ← Prisma Client Generated for PostgreSQL
 ├── public/
 │   └── manifest.json            ← Desktop PWA Manifest (Standalone Mode & Desktop Shortcuts)
 ├── mobile/                      ← C# Avalonia Mobile Application (Cross-Platform)
@@ -39,7 +39,7 @@ kztek-work-management/
 │   └── plans/
 │       ├── PLAN-upgrade-sqlserver-2026-08-19/ ← Plan Nâng cấp CSDL Microsoft SQL Server
 │       └── PLAN-desktop-web-app-2026-08-18/   ← Plan Master & Steps Phase 4
-├── scripts/                     ← Automation, Migration & Verification scripts (migrate-sqlite-to-sqlserver.ts, test_e2e_sqlserver.ts)
+├── scripts/                     ← Automation, Migration & Verification scripts (test_e2e_postgres.ts)
 └── GEMINI.md                    ← Quy tắc điều phối Multi-Agent KZTEK
 ```
 
@@ -51,7 +51,7 @@ kztek-work-management/
 |---|---|---|---|
 | WYSIWYG Live Rich Text Editor Suite & Parser | `src/components/ui/wysiwyg-editor.tsx`, `rich-text-toolbar.tsx`, `rich-markdown.tsx` | Hệ thống trình soạn thảo trực quan thời gian thực WYSIWYG (In đậm, In nghiêng, Gạch chân, Gạch ngang, Đổi màu chữ trực tiếp, Đánh dấu Highlight, Danh sách 1. 2. 3., Bullet, Headings H1-H3, Blockquote, Code) với cơ chế đồng bộ 2 chiều giữa HTML và Markdown | `wysiwyg-editor.tsx`, `rich-text-toolbar.tsx`, `rich-markdown.tsx`, `task-dialog.tsx`, `new-task-dialog.tsx`, `mention-comment-input.tsx`, `ticket-drawer.tsx`, `sprint-detail-dialog.tsx`, `desktop-scratchpad.tsx`, `portal/page.tsx`, `portal/tickets/[trackingCode]/page.tsx` |
 | Universal SWR Tab Cache & Prefetching | `src/lib/tab-cache.ts`, `src/components/app-shell.tsx` | Hệ thống Client Cache Stale-While-Revalidate (SWR) toàn cục, khử trùng lặp request (deduping), hover prefetching và đồng bộ tức thì (< 10ms) giữa các tab | `src/lib/tab-cache.ts`, `src/components/app-shell.tsx`, `board/page.tsx`, `dashboard/page.tsx`, `sprints/page.tsx`, `reports/page.tsx` |
-| Database & ORM Engine (SQL Server) | `prisma/`, `src/lib/prisma.ts`, `prisma.config.ts` | Kết nối CSDL quan hệ Microsoft SQL Server (`WorkingManager`), Driver Adapter `PrismaMssql`, 17 bảng dữ liệu (Users, Teams, Roles, Projects, Sprints, Tasks, Labels, Subtasks, Comments, Activities, Tickets, TicketComments, Attachments, Notifications, SystemSetting) | `prisma/schema.prisma`, `src/lib/prisma.ts`, `prisma.config.ts`, `.env` |
+| Database & ORM Engine (PostgreSQL) | `prisma/`, `src/lib/prisma.ts`, `prisma.config.ts` | Kết nối CSDL quan hệ PostgreSQL (`WorkingManager`), Driver Adapter `PrismaPg`, 17 bảng dữ liệu (Users, Teams, Roles, Projects, Sprints, Tasks, Labels, Subtasks, Comments, Activities, Tickets, TicketComments, Attachments, Notifications, SystemSetting) | `prisma/schema.prisma`, `src/lib/prisma.ts`, `prisma.config.ts`, `.env` |
 | System Configuration & Persistence | `src/lib/system-config.ts`, `src/app/api/system/config/` | Quản trị và lưu trữ cấu hình hệ thống (SMTP, Thương hiệu đơn vị, Thông báo, Base URL) bền vững trong bảng CSDL `SystemSetting` (SQL Server), tự động đồng bộ cache in-memory và backup đĩa | `src/lib/system-config.ts`, `src/app/api/system/config/route.ts`, `src/lib/mail.ts`, `src/app/projects/[projectId]/settings/page.tsx` |
 | Desktop Web Workstation (Phase 4) | `src/app/desktop/`, `src/components/desktop/` | Giao diện làm việc máy tính chuyên dụng, Dual-Pane Split-View (50:50, 65:35), System Status Bar, Global Command Palette (`Ctrl+K`), Shortcuts Hub, PWA Standalone | `page.tsx`, `desktop-split-view.tsx`, `desktop-status-bar.tsx`, `command-palette.tsx`, `shortcuts-modal.tsx`, `manifest.json` |
 | Smart Work Calculator Suite | `src/components/desktop/smart-work-calculator.tsx` | Bộ công cụ máy tính năng suất: Máy tính số học, Ước lượng Sprint Capacity & Story Points (Fibonacci), KPI & Chi phí | `smart-work-calculator.tsx`, `desktop-scratchpad.tsx` |
@@ -64,6 +64,7 @@ kztek-work-management/
 
 ---
 
+| 2026-10-28 | `prisma/schema.prisma`, `src/lib/prisma.ts`, `package.json`, `docker-compose.yml`, `.env.example`, `Dockerfile`, `src/lib/tickets.ts`, `src/app/api/auth/login/route.ts`, `src/app/api/users/*`, `scripts/test_e2e_postgres.ts`, `scripts/*` (xoá) | Refactor/DB-Migrate-PostgreSQL | Chuyển CSDL từ Microsoft SQL Server sang PostgreSQL (không chuyển dữ liệu cũ): đổi provider + `@db.NVarChar` → `@db.Text`, adapter `PrismaMssql` → `PrismaPg`, thêm service `db` (postgres:17, ICU vi-VN) vào docker-compose; xử lý khác biệt phân biệt hoa/thường (tìm kiếm ticket, đăng nhập theo tên, chuẩn hoá email lowercase), thêm `@unique` cho `zaloUserId`/`discordUserId`. Dọn 17 script SQLite cũ, `prisma/dev.db`, `scripts/linux-sql-server/` và dependency `better-sqlite3`. | senior-developer |
 | 2026-08-21 | `src/components/board/new-task-dialog.tsx`, `task-dialog.tsx`, `priority-icon.tsx`, `type-icon.tsx` | Feature/Synchronize-All-Dropdown-Selectors-Design | Đồng bộ hóa toàn diện hệ thống Dropdown / Selector trong Modal Tạo mới (`NewTaskDialog`) và Modal Chi tiết (`TaskDialog`) giống hệt ngoài Board: Tích hợp đầy đủ biểu tượng nhận diện (TypeIcon, Status dot, PriorityIcon, Rocket Sprint), typography in đậm, trạng thái highlight lựa chọn kèm dấu tích '✓', popup panel bo tròn `rounded-xl shadow-2xl` hiển thị trực quan và đồng nhất 100% với thanh công cụ lọc của Kanban Board. | junior-developer, senior-developer, tech-lead, ux-ui-reviewer, qa-engineer |
 | 2026-08-21 | `src/components/board/assignee-quick-select.tsx`, `new-task-dialog.tsx`, `task-dialog.tsx` | Feature/AssigneeQuickSelect-Field-Variant-Modal-Integration | Tích hợp toàn diện giao diện chọn người phụ trách cao cấp (`AssigneeQuickSelect` với `variant="field"`) vào cả Modal Tạo công việc mới (`NewTaskDialog`) và Modal Chi tiết (`TaskDialog`) giống hệt ngoài Board: Hỗ trợ thanh tìm kiếm real-time theo tên/email/vai trò/từ khóa, lọc theo nhóm chuyên môn (Dropdown Teams), tùy chọn 'Chưa giao việc' nổi bật kèm icon và trạng thái 'Đang chọn ✓', avatar kèm huy hiệu Nhóm có màu sắc nhận diện. | junior-developer, senior-developer, tech-lead, ux-ui-reviewer, qa-engineer |
 | 2026-08-21 | `src/components/board/new-task-dialog.tsx`, `src/components/ui/wysiwyg-editor.tsx`, `src/components/ui/file-upload-zone.tsx` | Fix/NewTaskDialog-Single-Outer-Border-Wrapper | Chuẩn hóa 1 lớp viền bao ngoài duy nhất (`Single Outer Border Wrapper`) cho 3 khối chức năng trong Modal Tạo công việc mới (`NewTaskDialog`): (1) Khối 'Mô tả chi tiết' có 1 border card bao ngoài, tích hợp `borderless={true}` cho `WysiwygEditor` để loại bỏ hoàn toàn viền lồng bên trong; (2) Khối 'Danh sách việc con (Checklist)' có 1 border card bao ngoài, nội dung bên trong hiển thị phẳng; (3) Khối 'Đính kèm tệp tin & tài liệu' có 1 border card bao ngoài, dropzone bên trong tinh giản không bị viền kép. | junior-developer, senior-developer, tech-lead, ux-ui-reviewer, qa-engineer |

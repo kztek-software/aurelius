@@ -106,8 +106,12 @@ export function TaskDialog({
   const [linkCopied, setLinkCopied] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
 
-  // Sync state whenever task prop updates or dialog opens with a task
-  useEffect(() => {
+  // Sync state whenever task prop updates or dialog opens with a task.
+  // Điều chỉnh state ngay trong lúc render (thay vì useEffect) để form không
+  // hiển thị dữ liệu của task cũ ở lượt render đầu sau khi prop `task` đổi.
+  const [prevTask, setPrevTask] = useState(task);
+  if (task !== prevTask) {
+    setPrevTask(task);
     if (task) {
       setTitle(task.title);
       setDescriptionValue(task.description ?? "");
@@ -122,7 +126,7 @@ export function TaskDialog({
       setSprintId(task.sprintId ?? null);
       setLabelIds(task.labels ? task.labels.map((tl) => tl.label.id) : []);
     }
-  }, [task]);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -152,6 +156,38 @@ export function TaskDialog({
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!task) return;
+    function handleTaskDialogKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "Enter")) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSave();
+        return;
+      }
+      if (e.key === "Escape" && isEditingDescription) {
+        e.stopPropagation();
+        setIsEditingDescription(false);
+        setDescriptionValue(task?.description ?? "");
+      }
+    }
+    window.addEventListener("keydown", handleTaskDialogKeyDown, true);
+    return () => window.removeEventListener("keydown", handleTaskDialogKeyDown, true);
+  }, [
+    isEditingDescription,
+    task,
+    title,
+    descriptionValue,
+    status,
+    priority,
+    assigneeId,
+    type,
+    dueDate,
+    storyPoints,
+    sprintId,
+    labelIds,
+  ]);
 
   if (!task) return null;
 
@@ -238,36 +274,6 @@ export function TaskDialog({
     });
   }
 
-  useEffect(() => {
-    function handleTaskDialogKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "Enter")) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleSave();
-        return;
-      }
-      if (e.key === "Escape" && isEditingDescription) {
-        e.stopPropagation();
-        setIsEditingDescription(false);
-        setDescriptionValue(task?.description ?? "");
-      }
-    }
-    window.addEventListener("keydown", handleTaskDialogKeyDown, true);
-    return () => window.removeEventListener("keydown", handleTaskDialogKeyDown, true);
-  }, [
-    isEditingDescription,
-    task,
-    title,
-    descriptionValue,
-    status,
-    priority,
-    assigneeId,
-    type,
-    dueDate,
-    storyPoints,
-    sprintId,
-    labelIds,
-  ]);
 
   async function handleAddComment(data: { body: string; parentId?: string; mentions?: string[] }) {
     if (!data.body.trim()) return;

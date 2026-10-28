@@ -75,6 +75,7 @@ export function PermissionsProvider({
   useEffect(() => {
     // Initial fetch if empty (khi layout không truyền initialPermissions)
     if (permissions.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount: setState chỉ chạy sau await, rule không phân tích được biên async
       refreshPermissions();
     }
 

@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
+  if (user.mustChangePassword) redirect("/change-password");
 
   // 1. Tìm project đầu tiên mà user có quyền truy cập
   const targetProject = await prisma.project.findFirst({

@@ -68,6 +68,7 @@ export function NotificationBell({
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount: setState chỉ chạy sau await, rule không phân tích được biên async
     fetchNotifications();
     const interval = setInterval(() => {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {

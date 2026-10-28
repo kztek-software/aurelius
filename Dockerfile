@@ -2,8 +2,8 @@
 
 # ---------------------------------------------------------------------------
 # KZTEK Work Management (flowboard) — Next.js 16 App Router
-# App KHÔNG cần container database riêng: kết nối tới SQL Server ngoài qua
-# biến môi trường DATABASE_URL (xem prisma/schema.prisma + src/lib/prisma.ts).
+# Kết nối PostgreSQL (service `db` trong docker-compose.yml hoặc server ngoài)
+# qua biến môi trường DATABASE_URL (xem prisma/schema.prisma + src/lib/prisma.ts).
 # ---------------------------------------------------------------------------
 
 ARG NODE_VERSION=20
@@ -12,10 +12,8 @@ ARG NODE_VERSION=20
 FROM node:${NODE_VERSION}-bookworm-slim AS deps
 WORKDIR /app
 
-# python3/make/g++: fallback build tool cho better-sqlite3 nếu không tải
-# được prebuilt binary phù hợp base image (Debian glibc).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ openssl \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
@@ -39,6 +37,22 @@ ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
 RUN npm run build
+
+# --- Stage migrate — tạo/cập nhật bảng + seed admin (service `migrate` trong
+# docker-compose.yml chạy 1 lần trước app). Image runner standalone không có
+# Prisma CLI nên cần stage riêng. Dữ liệu mẫu chỉ tạo khi SEED_DEMO_DATA=true.
+FROM node:${NODE_VERSION}-bookworm-slim AS migrate
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/src/generated ./src/generated
+COPY package.json prisma.config.ts tsconfig.json ./
+COPY prisma ./prisma
+COPY src/lib/prisma.ts ./src/lib/prisma.ts
+
+# db push KHÔNG dùng --accept-data-loss: nếu thay đổi schema làm mất dữ liệu thì
+# dừng lại báo lỗi (app không khởi động) thay vì tự xoá cột/bảng.
+CMD ["sh", "-c", "npx prisma db push && npx tsx prisma/seed.ts"]
 
 # --- Stage 3: runner — image production tối giản ---------------------------
 FROM node:${NODE_VERSION}-bookworm-slim AS runner

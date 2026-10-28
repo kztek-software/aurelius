@@ -145,10 +145,15 @@ export function TicketListView({
     fetchTickets();
   }, [scopeFilter, statusFilter, priorityFilter, typeFilter]);
 
-  // Reset trang về 1 khi thay đổi bộ lọc hoặc tìm kiếm
-  useEffect(() => {
+  // Reset trang về 1 khi thay đổi bộ lọc hoặc tìm kiếm.
+  // Điều chỉnh ngay trong lúc render (thay vì useEffect) để tránh render thừa
+  // với danh sách đã phân trang sai — xem "Adjusting state when a prop changes".
+  const filterKey = `${scopeFilter}|${statusFilter}|${priorityFilter}|${typeFilter}|${search}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
     setFirst(0);
-  }, [scopeFilter, statusFilter, priorityFilter, typeFilter, search]);
+  }
 
   // Cắt lát danh sách ticket theo trang hiện tại
   const paginatedTickets = useMemo(() => {

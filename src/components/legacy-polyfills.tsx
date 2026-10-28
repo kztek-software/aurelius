@@ -68,7 +68,7 @@ if (typeof window !== "undefined") {
 
   // 4. Polyfill requestIdleCallback
   if (!("requestIdleCallback" in window)) {
-    (window as any).requestIdleCallback = function (cb: Function) {
+    (window as any).requestIdleCallback = function (cb: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void) {
       return setTimeout(() => {
         try {
           cb({

@@ -101,7 +101,11 @@ export function TicketDrawer({
 
   const [copiedCode, setCopiedCode] = useState(false);
 
-  useEffect(() => {
+  // Đồng bộ form theo ticket đang mở. Điều chỉnh trong lúc render (thay vì
+  // useEffect) để drawer không hiện dữ liệu ticket trước ở lượt render đầu.
+  const [prevTicketSync, setPrevTicketSync] = useState({ ticket, projectId });
+  if (prevTicketSync.ticket !== ticket || prevTicketSync.projectId !== projectId) {
+    setPrevTicketSync({ ticket, projectId });
     if (ticket) {
       setStatus(ticket.status);
       setPriority(ticket.priority);
@@ -111,9 +115,7 @@ export function TicketDrawer({
       setConvertCustomTitle(`[${ticket.trackingCode}] ${ticket.title}`);
       setTargetProjectId(ticket.projectId || projectId);
     }
-  }, [ticket, projectId]);
-
-  if (!isOpen || !ticket) return null;
+  }
 
   async function handleDispatch() {
     if (!targetProjectId) {
@@ -286,7 +288,7 @@ export function TicketDrawer({
 
   // Keyboard shortcuts listener for TicketDrawer
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !ticket) return;
 
     function handleTicketDrawerKeyDown(e: KeyboardEvent) {
       // Ctrl + Enter / Cmd + Enter
@@ -343,6 +345,8 @@ export function TicketDrawer({
     ticket,
     allProjects,
   ]);
+
+  if (!isOpen || !ticket) return null;
 
   const statusList = [
     { id: "OPEN", label: "Mới tiếp nhận (OPEN)", color: "text-blue-400" },

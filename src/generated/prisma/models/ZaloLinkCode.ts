@@ -404,6 +404,7 @@ export type ZaloLinkCodeCreateOrConnectWithoutUserInput = {
 
 export type ZaloLinkCodeCreateManyUserInputEnvelope = {
   data: Prisma.ZaloLinkCodeCreateManyUserInput | Prisma.ZaloLinkCodeCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type ZaloLinkCodeUpsertWithWhereUniqueWithoutUserInput = {
@@ -478,7 +479,25 @@ export type ZaloLinkCodeSelect<ExtArgs extends runtime.Types.Extensions.Internal
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["zaloLinkCode"]>
 
+export type ZaloLinkCodeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  code?: boolean
+  userId?: boolean
+  expiresAt?: boolean
+  consumedAt?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["zaloLinkCode"]>
 
+export type ZaloLinkCodeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  code?: boolean
+  userId?: boolean
+  expiresAt?: boolean
+  consumedAt?: boolean
+  createdAt?: boolean
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["zaloLinkCode"]>
 
 export type ZaloLinkCodeSelectScalar = {
   id?: boolean
@@ -491,6 +510,12 @@ export type ZaloLinkCodeSelectScalar = {
 
 export type ZaloLinkCodeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "userId" | "expiresAt" | "consumedAt" | "createdAt", ExtArgs["result"]["zaloLinkCode"]>
 export type ZaloLinkCodeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type ZaloLinkCodeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type ZaloLinkCodeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -624,6 +649,30 @@ export interface ZaloLinkCodeDelegate<ExtArgs extends runtime.Types.Extensions.I
   createMany<T extends ZaloLinkCodeCreateManyArgs>(args?: Prisma.SelectSubset<T, ZaloLinkCodeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ZaloLinkCodes and returns the data saved in the database.
+   * @param {ZaloLinkCodeCreateManyAndReturnArgs} args - Arguments to create many ZaloLinkCodes.
+   * @example
+   * // Create many ZaloLinkCodes
+   * const zaloLinkCode = await prisma.zaloLinkCode.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ZaloLinkCodes and only return the `id`
+   * const zaloLinkCodeWithIdOnly = await prisma.zaloLinkCode.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ZaloLinkCodeCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ZaloLinkCodeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ZaloLinkCodePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ZaloLinkCode.
    * @param {ZaloLinkCodeDeleteArgs} args - Arguments to delete one ZaloLinkCode.
    * @example
@@ -686,6 +735,36 @@ export interface ZaloLinkCodeDelegate<ExtArgs extends runtime.Types.Extensions.I
    * 
    */
   updateMany<T extends ZaloLinkCodeUpdateManyArgs>(args: Prisma.SelectSubset<T, ZaloLinkCodeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ZaloLinkCodes and returns the data updated in the database.
+   * @param {ZaloLinkCodeUpdateManyAndReturnArgs} args - Arguments to update many ZaloLinkCodes.
+   * @example
+   * // Update many ZaloLinkCodes
+   * const zaloLinkCode = await prisma.zaloLinkCode.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ZaloLinkCodes and only return the `id`
+   * const zaloLinkCodeWithIdOnly = await prisma.zaloLinkCode.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ZaloLinkCodeUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ZaloLinkCodeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ZaloLinkCodePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ZaloLinkCode.
@@ -1116,6 +1195,30 @@ export type ZaloLinkCodeCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many ZaloLinkCodes.
    */
   data: Prisma.ZaloLinkCodeCreateManyInput | Prisma.ZaloLinkCodeCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
+ * ZaloLinkCode createManyAndReturn
+ */
+export type ZaloLinkCodeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ZaloLinkCode
+   */
+  select?: Prisma.ZaloLinkCodeSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ZaloLinkCode
+   */
+  omit?: Prisma.ZaloLinkCodeOmit<ExtArgs> | null
+  /**
+   * The data used to create many ZaloLinkCodes.
+   */
+  data: Prisma.ZaloLinkCodeCreateManyInput | Prisma.ZaloLinkCodeCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZaloLinkCodeIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1160,6 +1263,36 @@ export type ZaloLinkCodeUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many ZaloLinkCodes to update.
    */
   limit?: number
+}
+
+/**
+ * ZaloLinkCode updateManyAndReturn
+ */
+export type ZaloLinkCodeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ZaloLinkCode
+   */
+  select?: Prisma.ZaloLinkCodeSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ZaloLinkCode
+   */
+  omit?: Prisma.ZaloLinkCodeOmit<ExtArgs> | null
+  /**
+   * The data used to update ZaloLinkCodes.
+   */
+  data: Prisma.XOR<Prisma.ZaloLinkCodeUpdateManyMutationInput, Prisma.ZaloLinkCodeUncheckedUpdateManyInput>
+  /**
+   * Filter which ZaloLinkCodes to update
+   */
+  where?: Prisma.ZaloLinkCodeWhereInput
+  /**
+   * Limit how many ZaloLinkCodes to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZaloLinkCodeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

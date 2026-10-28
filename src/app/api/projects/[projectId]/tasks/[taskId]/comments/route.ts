@@ -58,7 +58,7 @@ export async function POST(
   }
 
   const commentText = parsed.data.body;
-  let mentionedUserIds = [...(parsed.data.mentionedUserIds || [])];
+  const mentionedUserIds = [...(parsed.data.mentionedUserIds || [])];
 
   // Tự động tìm thêm user IDs nếu trong nội dung có định dạng @[Name](userId) hoặc @username
   if (mentionedUserIds.length === 0 && commentText.includes("@")) {

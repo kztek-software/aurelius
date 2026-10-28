@@ -1,5 +1,7 @@
+import "./load-env";
 import { prisma } from "../src/lib/prisma";
 import { scryptSync, randomBytes } from "crypto";
+import { createInterface } from "node:readline/promises";
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -10,32 +12,82 @@ export function hashPassword(password: string): string {
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
 const daysFromNow = (n: number) => new Date(Date.now() + n * 24 * 60 * 60 * 1000);
 
+const ADMIN_EMAIL = "admin@kztek.net";
+
+// Có seed dữ liệu mẫu (users demo, dự án, sprint, tasks) hay không — thứ tự ưu tiên:
+//   1. Cờ dòng lệnh --demo / --no-demo   (VD: npx prisma db seed -- --demo)
+//   2. Biến môi trường SEED_DEMO_DATA=true|false
+//   3. Hỏi trực tiếp nếu đang chạy trong terminal (mặc định: Không)
+//   4. Còn lại (CI, Docker, không có terminal): Không
+async function shouldSeedDemo(): Promise<boolean> {
+  const args = process.argv.slice(2);
+  if (args.includes("--demo")) return true;
+  if (args.includes("--no-demo")) return false;
+
+  const env = process.env.SEED_DEMO_DATA?.trim().toLowerCase();
+  if (env) return ["true", "1", "yes", "y"].includes(env);
+
+  if (!process.stdin.isTTY) return false;
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const answer = await rl.question(
+      "❓ Tạo dữ liệu mẫu (người dùng demo, dự án, sprint, tasks)? [y/N]: "
+    );
+    return ["y", "yes", "c", "co", "có"].includes(answer.trim().toLowerCase());
+  } finally {
+    rl.close();
+  }
+}
+
+// Luôn đảm bảo có tài khoản admin để đăng nhập lần đầu. Nếu đã tồn tại thì
+// giữ nguyên (không reset mật khẩu admin đã đổi).
+async function seedAdmin(): Promise<boolean> {
+  const existing = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
+  if (existing) return false;
+
+  await prisma.user.create({
+    data: {
+      name: "Quản trị viên KZTEK",
+      email: ADMIN_EMAIL,
+      passwordHash: hashPassword("Kztek@2026"),
+      avatarColor: "#f05922",
+      title: "System Administrator",
+      role: "ADMIN",
+    },
+  });
+  return true;
+}
+
 async function main() {
-  await prisma.activity.deleteMany();
-  await prisma.comment.deleteMany();
-  await prisma.subtask.deleteMany();
-  await prisma.taskLabel.deleteMany();
-  await prisma.task.deleteMany();
-  await prisma.label.deleteMany();
-  await prisma.sprint.deleteMany();
-  await prisma.projectMember.deleteMany();
-  await prisma.project.deleteMany();
-  await prisma.user.deleteMany();
+  const created = await seedAdmin();
+  console.log(
+    created
+      ? `✅ Đã tạo tài khoản admin: ${ADMIN_EMAIL} / Kztek@2026 (đổi mật khẩu sau khi đăng nhập)`
+      : `ℹ️  Tài khoản admin ${ADMIN_EMAIL} đã tồn tại — giữ nguyên`
+  );
 
+  // Dữ liệu mẫu chỉ tạo trên DB trống (ngoài admin) để không bao giờ ghi đè/xoá dữ liệu thật.
+  const [projectCount, otherUserCount] = await Promise.all([
+    prisma.project.count(),
+    prisma.user.count({ where: { email: { not: ADMIN_EMAIL } } }),
+  ]);
+  if (projectCount > 0 || otherUserCount > 0) {
+    console.log("ℹ️  CSDL đã có dữ liệu — bỏ qua dữ liệu mẫu.");
+    return;
+  }
+
+  if (!(await shouldSeedDemo())) {
+    console.log("ℹ️  Bỏ qua dữ liệu mẫu.");
+    return;
+  }
+
+  await seedDemoData();
+}
+
+async function seedDemoData() {
   const passwordHash = hashPassword("demo123");
-  const adminPasswordHash = hashPassword("Kztek@2026");
 
-  const [admin, alice, binh, chi] = await Promise.all([
-    prisma.user.create({
-      data: {
-        name: "Quản trị viên KZTEK",
-        email: "admin@kztek.net",
-        passwordHash: adminPasswordHash,
-        avatarColor: "#f05922",
-        title: "System Administrator",
-        role: "ADMIN",
-      },
-    }),
+  const [alice, binh, chi] = await Promise.all([
     prisma.user.create({
       data: {
         name: "Alice Nguyen",
@@ -208,9 +260,9 @@ async function main() {
     }
   }
 
-  console.log("✅ Seed hoàn tất:");
-  console.log("   Users: admin@kztek.net / alice@demo.dev / binh@demo.dev / chi@demo.dev");
-  console.log(`   Project: ${project.name} (${project.key}) — ${number} tasks`);
+  console.log("✅ Đã tạo dữ liệu mẫu:");
+  console.log("   Users: alice@demo.dev / binh@demo.dev / chi@demo.dev (mật khẩu: demo123)");
+  console.log(`   Project: ${project.name} (${project.key}) — 2 sprints, ${number} tasks`);
 }
 
 main()
