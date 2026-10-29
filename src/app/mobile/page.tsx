@@ -24,6 +24,13 @@ import {
 } from "lucide-react";
 import { Dropdown } from "primereact/dropdown";
 
+// Ghi cookie + chuyển trang nằm ngoài component: react-hooks/immutability không
+// cho gán biến toàn cục (document/window) bên trong component.
+function redirectToChangePassword(token: string) {
+  document.cookie = `flowboard_session=${token}; path=/; max-age=604800; SameSite=Lax`;
+  window.location.href = "/change-password";
+}
+
 export default function MobileSimulatorPage() {
   const [token, setToken] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -79,8 +86,7 @@ export default function MobileSimulatorPage() {
       }
 
       if (data.user?.mustChangePassword) {
-        document.cookie = `flowboard_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
-        window.location.href = "/change-password";
+        redirectToChangePassword(data.token);
         return;
       }
 
