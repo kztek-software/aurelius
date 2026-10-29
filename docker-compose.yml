@@ -26,7 +26,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: migrate
-    image: kztek/work-management-migrate:latest
+    # IMAGE_TAG: latest (staging) | stable (production) — CI và server dùng chung
+    image: kztek/work-management-migrate:${IMAGE_TAG:-latest}
     restart: "no"
     env_file: .env
     depends_on:
@@ -39,7 +40,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: kztek/work-management:latest
+    image: kztek/work-management:${IMAGE_TAG:-latest}
     container_name: kztek-work-management
     restart: unless-stopped
     ports:
