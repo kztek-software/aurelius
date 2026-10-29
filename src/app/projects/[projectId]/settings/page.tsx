@@ -36,6 +36,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { boardHref } from "@/lib/board-link";
 
 type SystemConfigState = {
   smtp: {
@@ -421,7 +422,7 @@ export default function AdminSettingsPage() {
 
           <div className="mt-6 flex justify-center gap-3">
             <Button
-              onClick={() => router.push(`/projects/${projectId}/board`)}
+              onClick={() => router.push(boardHref(projectId))}
               className="font-bold text-xs gap-1.5 cursor-pointer bg-accent hover:bg-accent/90"
             >
               <ArrowLeft className="h-4 w-4" /> Quay lại Board Công Việc

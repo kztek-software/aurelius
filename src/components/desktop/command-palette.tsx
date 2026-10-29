@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Keyboard,
   Layers,
+  TrendingUp,
 } from "lucide-react";
 
 interface CommandPaletteProps {
@@ -124,7 +125,19 @@ export function CommandPalette({
       icon: KanbanSquare,
       action: () => {
         onClose();
-        if (projectId) router.push(`/projects/${projectId}/board`);
+        // Board Công Việc là route cấp ngoài, tự nhớ lựa chọn dự án gần nhất
+        router.push("/board");
+      },
+    },
+    {
+      id: "act-open-my-stats",
+      category: "🧭 Điều Hướng",
+      title: "Thống Kê Công Việc",
+      subtitle: "Số liệu cá nhân & nhóm mình quản lý theo khoảng thời gian",
+      icon: TrendingUp,
+      action: () => {
+        onClose();
+        if (projectId) router.push(`/projects/${projectId}/my-stats`);
         else router.push("/");
       },
     },

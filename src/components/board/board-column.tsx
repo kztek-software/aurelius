@@ -3,7 +3,7 @@
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Plus, ListTodo } from "lucide-react";
-import type { TaskDto, MemberDto } from "@/lib/types";
+import type { TaskDto, MemberDto, TaskProjectTag } from "@/lib/types";
 import { SortableTaskCard } from "./sortable-task-card";
 
 type Status = { id: string; label: string; color: string };
@@ -15,6 +15,9 @@ export function BoardColumn({
   onTaskClick,
   members,
   onAssign,
+  membersByProject,
+  projectTags,
+  readOnlyProjectIds,
 }: {
   status: Status;
   tasks: TaskDto[];
@@ -22,6 +25,10 @@ export function BoardColumn({
   onTaskClick: (id: string) => void;
   members?: MemberDto[];
   onAssign?: (taskId: string, userId: string | null) => void;
+  // Board đa dự án: thành viên / nhãn dự án / quyền chỉ xem tra theo projectId của từng task
+  membersByProject?: Record<string, MemberDto[]>;
+  projectTags?: Record<string, TaskProjectTag>;
+  readOnlyProjectIds?: Set<string>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status.id });
   const points = tasks.reduce((sum, t) => sum + (t.storyPoints ?? 0), 0);
@@ -72,15 +79,20 @@ export function BoardColumn({
               : ""
           }`}
         >
-          {tasks.map((task) => (
-            <SortableTaskCard
-              key={task.id}
-              task={task}
-              onClick={() => onTaskClick(task.id)}
-              members={members}
-              onAssign={onAssign}
-            />
-          ))}
+          {tasks.map((task) => {
+            const readOnly = readOnlyProjectIds?.has(task.projectId) ?? false;
+            return (
+              <SortableTaskCard
+                key={task.id}
+                task={task}
+                onClick={() => onTaskClick(task.id)}
+                members={membersByProject?.[task.projectId] ?? members}
+                onAssign={readOnly ? undefined : onAssign}
+                projectTag={projectTags?.[task.projectId]}
+                dragDisabled={readOnly}
+              />
+            );
+          })}
 
           {tasks.length === 0 && (
             <div className="flex h-28 flex-col items-center justify-center rounded-xl border border-dashed border-line/80 p-3 text-center text-xs text-muted/60 space-y-1">

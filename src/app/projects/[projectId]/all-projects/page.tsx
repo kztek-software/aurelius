@@ -36,6 +36,7 @@ import { Avatar, AvatarFallback, initials } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { boardHref } from "@/lib/board-link";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
@@ -878,7 +879,7 @@ export default function AllProjectsManagementPage() {
                           {/* Board Link */}
                           <Tooltip content="Mở bảng công việc (Board Kanban)" side="top">
                             <Link
-                              href={`/projects/${p.id}/board`}
+                              href={boardHref(p.id)}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-all cursor-pointer shrink-0"
                             >
                               <KanbanSquare className="h-4 w-4" />

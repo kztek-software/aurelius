@@ -203,11 +203,15 @@ export function useTabCache<T>(
   const fetcherRef = useRef(fetcher);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
+  // Key hiện tại của hook: request của key cũ trả về muộn (đổi key liên tục) không được
+  // ghi đè state đang hiển thị cho key mới — dữ liệu vẫn được lưu vào cache theo key của nó.
+  const keyRef = useRef(key);
 
   useEffect(() => {
     fetcherRef.current = fetcher;
     onSuccessRef.current = onSuccess;
     onErrorRef.current = onError;
+    keyRef.current = key;
   });
 
   // Đồng bộ state khi `key` thay đổi. Giá trị lúc mount đã được lấy từ cache
@@ -255,16 +259,20 @@ export function useTabCache<T>(
   const revalidate = useCallback(async (): Promise<T | null> => {
     if (!key || !enabled) return null;
 
+    const isCurrentKey = () => keyRef.current === key;
+
     // Khử trùng lặp: Nếu đang có request cho key này, đợi kết quả chung
     if (inflightRequests.has(key)) {
       setIsValidating(true);
       try {
         const result = (await inflightRequests.get(key)) as T;
-        setData(result);
+        if (isCurrentKey()) setData(result);
         return result;
       } finally {
-        setIsValidating(false);
-        setLoading(false);
+        if (isCurrentKey()) {
+          setIsValidating(false);
+          setLoading(false);
+        }
       }
     }
 
@@ -274,17 +282,24 @@ export function useTabCache<T>(
     const promise = (async () => {
       try {
         const freshData = await fetcherRef.current();
+        // setTabCache tự báo cho listener của đúng key này (component đang ở key đó vẫn nhận)
         setTabCache(key, freshData, true);
-        setData(freshData);
-        onSuccessRef.current?.(freshData);
+        if (isCurrentKey()) {
+          setData(freshData);
+          onSuccessRef.current?.(freshData);
+        }
         return freshData;
       } catch (err) {
-        setError(err);
-        onErrorRef.current?.(err);
+        if (isCurrentKey()) {
+          setError(err);
+          onErrorRef.current?.(err);
+        }
         return null;
       } finally {
-        setIsValidating(false);
-        setLoading(false);
+        if (isCurrentKey()) {
+          setIsValidating(false);
+          setLoading(false);
+        }
         inflightRequests.delete(key);
       }
     })();

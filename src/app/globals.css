@@ -250,8 +250,9 @@ select optgroup {
   }
 }
 
+/* Không dùng forwards: transform còn giữ lại biến wrapper thành containing block, làm lệch phần tử position: fixed bên trong */
 .animate-tab-fade {
-  animation: tab-fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: tab-fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes page-enter {
@@ -265,8 +266,9 @@ select optgroup {
   }
 }
 
+/* Không dùng forwards: cùng lý do với .animate-tab-fade (DragOverlay, modal fixed bị lệch) */
 .animate-page-enter {
-  animation: page-enter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: page-enter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes pulse-subtle {

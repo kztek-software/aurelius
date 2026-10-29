@@ -37,6 +37,7 @@ import {
   MessageCircle,
   Bell,
   Bot,
+  TrendingUp,
 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,16 @@ const PROJECT_GRADIENTS = [
   "from-[#F05922] to-[#251C53]",
   "from-cyan-500 to-blue-600",
 ];
+
+// Khóa lưu mục đã ghim. Trang "Thống Kê Công Việc" không phụ thuộc dự án nên dùng khóa cố định,
+// để mục ghim không biến mất khi chuyển sang dự án khác.
+// Href ghim cũ của Board theo từng dự án (/projects/<id>/board) — nay Board là route cấp ngoài /board
+const LEGACY_BOARD_HREF = /^\/projects\/[^/]+\/board$/;
+
+function pinKeyOf(href: string) {
+  if (LEGACY_BOARD_HREF.test(href)) return "/board";
+  return href.endsWith("/my-stats") ? "workspace:my-stats" : href;
+}
 
 function getProjectGradient(key: string) {
   let hash = 0;
@@ -174,12 +185,19 @@ export function AppShell({
   // `pinnedOverride` giữ thay đổi của phiên hiện tại và được ưu tiên hơn
   // localStorage, nhờ đó ghim vẫn hoạt động khi localStorage bị chặn.
   const [pinnedOverride, setPinnedOverride] = useState<string[] | null>(null);
-  const pinnedHrefs = pinnedOverride ?? persistedPinned;
+  const pinnedHrefs = [...new Set((pinnedOverride ?? persistedPinned).map(pinKeyOf))];
+
+  // Chuyển mục ghim Board cũ (/projects/<id>/board) sang /board và ghi lại localStorage một lần
+  useEffect(() => {
+    if (!persistedPinned.some((h) => LEGACY_BOARD_HREF.test(h))) return;
+    writeLocalStorage(pinnedStorageKey, JSON.stringify([...new Set(persistedPinned.map(pinKeyOf))]));
+  }, [persistedPinned, pinnedStorageKey]);
 
   function togglePinnedNav(href: string) {
-    const next = pinnedHrefs.includes(href)
-      ? pinnedHrefs.filter((h) => h !== href)
-      : [...pinnedHrefs, href];
+    const key = pinKeyOf(href);
+    const next = pinnedHrefs.includes(key)
+      ? pinnedHrefs.filter((h) => h !== key)
+      : [...pinnedHrefs, key];
     setPinnedOverride(next);
     writeLocalStorage(pinnedStorageKey, JSON.stringify(next));
   }
@@ -285,10 +303,15 @@ export function AppShell({
 
   const mainNav = [
     { href: `/projects/${project.id}/dashboard`, label: "Dashboard Dự Án", icon: LayoutDashboard },
-    { href: `/projects/${project.id}/board`, label: "Board Công Việc", icon: KanbanSquare },
     { href: `/projects/${project.id}/tickets`, label: "Hộp Thư Ticket KH", icon: LifeBuoy },
     { href: `/projects/${project.id}/sprints`, label: "Sprints & Kế Hoạch", icon: Rocket },
     { href: `/projects/${project.id}/reports`, label: "Báo Cáo & KPI", icon: BarChart3 },
+  ];
+
+  // Mục không gắn với dự án đang chọn: Board xem 1 hoặc nhiều dự án (/board) và số liệu tổng hợp của bản thân / nhóm
+  const workspaceNav = [
+    { href: "/board", label: "Board Công Việc", icon: KanbanSquare },
+    { href: `/projects/${project.id}/my-stats`, label: "Thống Kê Công Việc", icon: TrendingUp },
   ];
 
   const systemNav = [
@@ -433,6 +456,7 @@ export function AppShell({
     pathname.endsWith("/board") ? "Board Công Việc" :
     pathname.endsWith("/sprints") ? "Sprints & Kế Hoạch" :
     pathname.endsWith("/reports") ? "Báo Cáo & KPI" :
+    pathname.endsWith("/my-stats") ? "Thống Kê Công Việc" :
     pathname.endsWith("/tickets") ? "Tickets Khách Hàng" :
     pathname.endsWith("/notion") ? "Tích Hợp Notion Hub" :
     pathname.endsWith("/users") ? "Người Dùng & Phân Quyền" :
@@ -442,9 +466,13 @@ export function AppShell({
     "";
 
   // Danh sách phẳng toàn bộ mục nav (đã lọc visible) — dùng để tra cứu icon/label cho mục đã ghim
-  const allVisibleNavItems = [...mainNav, ...systemNav.filter((item) => item.visible)];
+  const allVisibleNavItems = [...workspaceNav, ...mainNav, ...systemNav.filter((item) => item.visible)];
+  // Board Công Việc (/board) không thuộc dự án nào -> breadcrumb không gắn tên dự án ngữ cảnh
+  const isBoardPage = pathname === "/board";
+  // Trang thuộc nhóm "Công việc" -> breadcrumb không hiển thị như trang con của dự án
+  const isWorkspacePage = workspaceNav.some((item) => pathname === item.href);
   const pinnedNavItems = pinnedHrefs
-    .map((href) => allVisibleNavItems.find((item) => item.href === href))
+    .map((href) => allVisibleNavItems.find((item) => pinKeyOf(item.href) === href))
     .filter((item): item is (typeof allVisibleNavItems)[number] => Boolean(item));
 
   // Helper: render 1 mục nav sidebar kèm nút ghim/bỏ ghim (dùng chung cho mainNav, systemNav và mục "Đã ghim")
@@ -455,12 +483,10 @@ export function AppShell({
   ) {
     const active =
       pathname === item.href || (item.href.endsWith("/dashboard") && pathname === `/projects/${project.id}`);
-    const pinned = pinnedHrefs.includes(item.href);
+    const pinned = pinnedHrefs.includes(pinKeyOf(item.href));
     const handlePrefetch = () => {
       if (item.href.endsWith("/dashboard")) {
         prefetchTab(`/api/projects/${project.id}/dashboard`);
-      } else if (item.href.endsWith("/board")) {
-        prefetchTab(`/api/projects/${project.id}/tasks`);
       } else if (item.href.endsWith("/sprints")) {
         prefetchTab(`/api/projects/${project.id}/tasks`);
         prefetchTab(`/api/projects/${project.id}/sprints`);
@@ -775,6 +801,14 @@ export function AppShell({
           </div>
         )}
 
+        {/* Work Section — không phụ thuộc dự án đang chọn */}
+        <div className="space-y-1">
+          <div className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-muted">
+            Công việc
+          </div>
+          {workspaceNav.map((item) => renderNavItem(item, isMobile))}
+        </div>
+
         {/* Main Workspace Section */}
         <div className="space-y-1">
           <div className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-muted">
@@ -886,15 +920,27 @@ export function AppShell({
               <Menu className="h-4 w-4" />
             </button>
 
-            <Link
-              href={`/projects/${project.id}/dashboard`}
-              className="text-muted hover:text-foreground flex items-center gap-1.5 transition-colors shrink-0"
-              suppressHydrationWarning
-            >
-              <FolderKanban className="h-3.5 w-3.5 text-accent" />
-              <span className="hidden sm:inline font-bold" suppressHydrationWarning>{project.name}</span>
-              <span className="sm:hidden font-mono font-bold text-accent" suppressHydrationWarning>{project.key}</span>
-            </Link>
+            {isBoardPage ? (
+              <span className="text-muted flex items-center gap-1.5 shrink-0 font-bold" suppressHydrationWarning>
+                <KanbanSquare className="h-3.5 w-3.5 text-accent" />
+                Công việc
+              </span>
+            ) : isWorkspacePage ? (
+              <span className="text-muted flex items-center gap-1.5 shrink-0 font-bold" suppressHydrationWarning>
+                <TrendingUp className="h-3.5 w-3.5 text-accent" />
+                Công việc
+              </span>
+            ) : (
+              <Link
+                href={`/projects/${project.id}/dashboard`}
+                className="text-muted hover:text-foreground flex items-center gap-1.5 transition-colors shrink-0"
+                suppressHydrationWarning
+              >
+                <FolderKanban className="h-3.5 w-3.5 text-accent" />
+                <span className="hidden sm:inline font-bold" suppressHydrationWarning>{project.name}</span>
+                <span className="sm:hidden font-mono font-bold text-accent" suppressHydrationWarning>{project.key}</span>
+              </Link>
+            )}
             <span className="text-muted/40">/</span>
             <span
               className="text-foreground font-bold truncate"
@@ -1116,13 +1162,13 @@ export function AppShell({
         </Link>
 
         <Link
-          href={`/projects/${project.id}/board`}
+          href="/board"
           className={cn(
             "flex flex-col items-center justify-center flex-1 h-full py-1 text-[10px] font-semibold transition-all duration-150 active:scale-90 cursor-pointer",
-            pathname.endsWith("/board") ? "text-accent font-bold" : "text-muted hover:text-foreground"
+            isBoardPage ? "text-accent font-bold" : "text-muted hover:text-foreground"
           )}
         >
-          <KanbanSquare className={cn("h-5 w-5 mb-0.5", pathname.endsWith("/board") && "text-accent")} />
+          <KanbanSquare className={cn("h-5 w-5 mb-0.5", isBoardPage && "text-accent")} />
           <span>Board</span>
         </Link>
 
@@ -1343,7 +1389,7 @@ export function AppShell({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                   <UserCheck className="h-3.5 w-3.5 text-emerald-400" />
-                  Nhân sự tham gia dự án ({selectedMemberIds.length + 1} người)
+                  Nhân sự tham gia dự án ({new Set([...selectedMemberIds, user.id]).size} người)
                 </span>
                 <span className="text-[10px] text-muted italic">
                   * Bạn ({user.name}) tự động là Chủ dự án (Owner)

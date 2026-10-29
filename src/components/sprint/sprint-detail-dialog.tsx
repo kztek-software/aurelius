@@ -38,6 +38,7 @@ import { STATUSES, PRIORITIES, TASK_TYPES, statusMeta } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { boardHref } from "@/lib/board-link";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, initials } from "@/components/ui/avatar";
 import { Dialog } from "primereact/dialog";
@@ -452,7 +453,7 @@ export function SprintDetailDialog({
 
   function handleGoToBoard() {
     onOpenChange(false);
-    router.push(`/projects/${projectId}/board?sprintId=${sprint.id}`);
+    router.push(boardHref(projectId, { sprintId: sprint.id }));
   }
 
   return (

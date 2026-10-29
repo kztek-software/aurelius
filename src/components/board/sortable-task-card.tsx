@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { TaskDto, MemberDto } from "@/lib/types";
+import type { TaskDto, MemberDto, TaskProjectTag } from "@/lib/types";
 import { TaskCard } from "./task-card";
 
 function SortableTaskCardComponent({
@@ -9,14 +9,20 @@ function SortableTaskCardComponent({
   onClick,
   members,
   onAssign,
+  projectTag,
+  dragDisabled,
 }: {
   task: TaskDto;
   onClick: () => void;
   members?: MemberDto[];
   onAssign?: (taskId: string, userId: string | null) => void;
+  projectTag?: TaskProjectTag;
+  // Khoá kéo thả riêng thẻ này (vd. user chỉ là Viewer ở dự án của task)
+  dragDisabled?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
+    disabled: dragDisabled,
   });
 
   const style: React.CSSProperties = {
@@ -41,7 +47,7 @@ function SortableTaskCardComponent({
           : "hover:-translate-y-0.5 hover:shadow-md"
       }`}
     >
-      <TaskCard task={task} members={members} onAssign={onAssign} />
+      <TaskCard task={task} members={members} onAssign={onAssign} projectTag={projectTag} />
     </div>
   );
 }
@@ -51,6 +57,8 @@ export const SortableTaskCard = memo(SortableTaskCardComponent, (prev, next) => 
     prev.task === next.task &&
     prev.onClick === next.onClick &&
     prev.members === next.members &&
-    prev.onAssign === next.onAssign
+    prev.onAssign === next.onAssign &&
+    prev.projectTag === next.projectTag &&
+    prev.dragDisabled === next.dragDisabled
   );
 });
