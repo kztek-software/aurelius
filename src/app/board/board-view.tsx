@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useDeferredValue } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
+import { createPortal } from "react-dom";
 import {
   DndContext,
   DragOverlay,
   PointerSensor,
-  MouseSensor,
   TouchSensor,
   KeyboardSensor,
   useSensor,
@@ -458,9 +458,7 @@ export function BoardView({
     };
   }, [isClient, projectsParam, loadBoard]);
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: { distance: 4 },
-  });
+  // Không dùng MouseSensor: PointerSensor luôn nhận pointerdown trước nên MouseSensor không bao giờ kích hoạt
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: { delay: 150, tolerance: 6 },
   });
@@ -468,7 +466,7 @@ export function BoardView({
     activationConstraint: { distance: 4 },
   });
   const keyboardSensor = useSensor(KeyboardSensor);
-  const sensors = useSensors(mouseSensor, touchSensor, pointerSensor, keyboardSensor);
+  const sensors = useSensors(touchSensor, pointerSensor, keyboardSensor);
 
   const collisionDetectionStrategy: CollisionDetection = useCallback((args) => {
     const pointerCollisions = pointerWithin(args);
@@ -1257,11 +1255,15 @@ export function BoardView({
           ))}
         </div>
 
-        <DragOverlay dropAnimation={dropAnimationConfig}>
-          {activeTask ? (
-            <TaskCard task={activeTask} overlay projectTag={projectTags?.[activeTask.projectId]} />
-          ) : null}
-        </DragOverlay>
+        {/* Portal ra body: tổ tiên có transform/filter làm overlay (position fixed) lệch khỏi con trỏ */}
+        {isClient && createPortal(
+          <DragOverlay dropAnimation={dropAnimationConfig}>
+            {activeTask ? (
+              <TaskCard task={activeTask} overlay projectTag={projectTags?.[activeTask.projectId]} />
+            ) : null}
+          </DragOverlay>,
+          document.body,
+        )}
       </DndContext>
 
       {/* Hộp chọn dự án đích khi tạo task (chế độ xem nhiều dự án) */}
